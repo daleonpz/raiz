@@ -29,3 +29,12 @@ clean:
 	rm -rf build
 	find . -type f -name "*.pyc" -delete
 
+.PHONY: help
+help:
+	@echo "Makefile commands:"
+	@echo "  all          - Build the shared library"
+	@echo "  test         - Run unit tests with pytest"
+	@echo "  robot        - Run robot framework tests"
+	@echo "  lint         - Check code style with ruff and black"
+	@echo "  format       - Format code with black"
+	@echo "  clean        - Clean build artifacts and Python bytecode"

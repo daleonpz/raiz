@@ -1,4 +1,4 @@
-#include "my_math_lib.h"
+#include "math.h"
 
 int add(int a, int b) {
     return a + b;

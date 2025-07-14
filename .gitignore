@@ -3,6 +3,11 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Robot
+log.html
+output.xml
+report.html
+
 # C extensions
 *.so
 

@@ -29,6 +29,7 @@
         pythonPackages.typer
         pythonPackages.black
         pythonPackages.ruff
+        pythonPackages.pyyaml
       ];
      
       shellHook = ''

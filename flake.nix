@@ -20,6 +20,7 @@
         cmake
         gnumake
         gcc
+        sqlite
         python
         pythonPackages.pip
         pythonPackages.setuptools

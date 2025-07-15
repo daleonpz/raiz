@@ -1,10 +1,18 @@
-- description: new oueau
+- description: requ 002
+  domain: logging
+  id: REQ-001
+  linked_tests: []
+  type: constraint
+  uuid: e09f4d1b-564f-486e-b156-f991ba649805
+- description: new description for 002
   domain: ble
   id: REQ-002
   linked_tests: []
-  type: constraint
-- description: new noeau
-  domain: logging
-  id: REQ-002
+  type: non-functional
+  uuid: 02302c0a-128c-4f2d-bb6a-e87be88445e8
+- description: antoher ausethousaeohu
+  domain: wlan
+  id: REQ-003
   linked_tests: []
   type: functional
+  uuid: 483eb6fe-7c1d-40f6-81bb-dd1069d8ebdd

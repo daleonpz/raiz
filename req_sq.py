@@ -5,6 +5,8 @@ import yaml
 from pathlib import Path
 from typing import Optional
 import logging
+from robot.api import ExecutionResult
+import csv
 
 app = typer.Typer()
 list_app = typer.Typer()
@@ -214,6 +216,81 @@ def update(
             """, (description, req_type, domain, seq_no))
             conn.commit()
             typer.echo(f"Updated REQ-{seq_no:03}")
+
+
+## TODO: Work in progress for traceability report generation
+@app.command()
+def trace(
+    output: str = typer.Option("traceability.csv", help="Output report filename (CSV or HTML)"),
+    robot_output: str = typer.Option("output.xml", help="Path to Robot Framework output.xml"),
+    format: str = typer.Option("csv", help="Output format: csv or html"),
+    update_db: bool = typer.Option(False, help="Do not update SQLite linked_tests field")
+):
+    """
+    Generate traceability report linking REQ-IDs to Robot tests.
+    """
+    init_db()
+
+    if not Path(robot_output).exists():
+        typer.echo(f"Robot output file {robot_output} not found.")
+        raise typer.Exit()
+
+    result = ExecutionResult(robot_output)
+    result.visit(lambda test: None)  # ensure processing
+
+    # Map: REQ-ID → list of (test name, status)
+    req_map = {}
+
+    for suite in result.suite.suites:
+        for test in suite.tests:
+            for tag in test.tags:
+                if tag.startswith("REQ-"):
+                    if tag not in req_map:
+                        req_map[tag] = []
+                    req_map[tag].append((test.name, test.status))
+
+    # Load existing requirements from DB
+    with db_conn() as conn:
+        cur = conn.execute("SELECT uuid, seq_no FROM requirements")
+        req_dict = {f"REQ-{row['seq_no']:03}": row["uuid"] for row in cur.fetchall()}
+
+    rows = []
+
+    with db_conn() as conn:
+        for req_id, uuid in req_dict.items():
+            if req_id in req_map:
+                linked = [name for name, _ in req_map[req_id]]
+                statuses = [status for _, status in req_map[req_id]]
+                overall_status = "FAILED" if "FAIL" in statuses else "PASSED"
+            else:
+                linked = []
+                overall_status = "NOT TESTED"
+
+            if update_db:
+                conn.execute("UPDATE requirements SET linked_tests = ? WHERE uuid = ?",
+                             (",".join(linked), uuid))
+
+            for test_name in linked or [""]:
+                rows.append({
+                    "REQ-ID": req_id,
+                    "linked_test": test_name,
+                    "STATUS": overall_status if test_name else "NOT TESTED"
+                })
+
+        if update_db:
+            conn.commit()
+
+    # Output CSV
+    if format == "csv":
+        with open(output, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=["REQ-ID", "linked_test", "STATUS"])
+            writer.writeheader()
+            writer.writerows(rows)
+        typer.echo(f"Traceability CSV report saved to {output}")
+    elif format == "html":
+        typer.echo("HTML format not implemented yet.")
+    else:
+        typer.echo("Invalid format. Use 'csv' or 'html'.")
 
 
 if __name__ == "__main__":

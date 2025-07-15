@@ -3,3 +3,8 @@
   id: REQ-002
   linked_tests: []
   type: constraint
+- description: new noeau
+  domain: logging
+  id: REQ-002
+  linked_tests: []
+  type: functional

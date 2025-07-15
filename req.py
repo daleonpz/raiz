@@ -7,6 +7,8 @@ import os
 import re
 
 app = typer.Typer()
+list_app = typer.Typer()
+app.add_typer(list_app, name="list", help="List requirements, types, or domains")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -34,8 +36,6 @@ def renumber_requirements(reqs):
 # search by number 001 instead of (REQ-001) 
 # input check
 # add shortcuts instead of functional, non-functional, constraint use f, n, c
-# add "list domains", to list all domains used in requirements
-# add "list types", to list all types used in requirements
 
 
 @app.command()
@@ -68,7 +68,8 @@ def rm(req_id: str):
     typer.echo(f"Removed {req_id} and renumbered all requirements.")
 
 
-@app.command()
+# @app.command()
+@list_app.command("all")
 def list(
     type: Optional[str] = typer.Option(None, help="Filter by type (functional, non-functional, constraint)"),
     domain: Optional[str] = typer.Option(None, help="Filter by domain (e.g., logging, ble, data-processing)"),
@@ -82,6 +83,29 @@ def list(
         if domain and r["domain"] != domain:
             continue
         typer.echo(f"{r['id']}: {r['description']} [{r['type']}, {r['domain']}]")
+
+
+@list_app.command("types")
+def list_types():
+    """
+    List all unique types used in requirements.
+    """
+    requirements = load_requirements()
+    types = sorted(set(req.get("type") for req in requirements if "type" in req))
+    typer.echo("Types:")
+    for t in types:
+        typer.echo(f"- {t}")
+
+@list_app.command("domains")
+def list_domains():
+    """
+    List all unique domains used in requirements.
+    """
+    requirements = load_requirements()
+    domains = sorted(set(req.get("domain") for req in requirements if "domain" in req))
+    typer.echo("Domains:")
+    for d in domains:
+        typer.echo(f"- {d}")
 
 # @app.command()
 # def trace(filter: Optional[str] = typer.Argument(None)):

@@ -7,6 +7,7 @@ from typing import Optional
 import logging
 from robot.api import ExecutionResult
 import csv
+import os
 
 app = typer.Typer()
 list_app = typer.Typer()
@@ -218,7 +219,6 @@ def update(
             typer.echo(f"Updated REQ-{seq_no:03}")
 
 
-## TODO: Work in progress for traceability report generation
 @app.command()
 def trace(
     output: str = typer.Option("traceability.csv", help="Output report filename (CSV or HTML)"),
@@ -236,18 +236,24 @@ def trace(
         raise typer.Exit()
 
     result = ExecutionResult(robot_output)
-    result.visit(lambda test: None)  # ensure processing
 
-    # Map: REQ-ID → list of (test name, status)
+    # Map: REQ-ID → list of (suite file name, test name, status)
     req_map = {}
 
+    root_source = result.suite.source
+    get_filename = lambda root, suite_src : os.path.basename(suite_src)
+
+    logging.info(f"Root suite source: {root_source}")
     for suite in result.suite.suites:
+        suite_filename = get_filename(root_source, suite.source)
         for test in suite.tests:
             for tag in test.tags:
                 if tag.startswith("REQ-"):
                     if tag not in req_map:
                         req_map[tag] = []
-                    req_map[tag].append((test.name, test.status))
+                    logging.info(f"Linking {tag} to test {test.name} with status {test.status} from suite {suite_filename}")
+                    req_map[tag].append((suite_filename, test.name, test.status))
+
 
     # Load existing requirements from DB
     with db_conn() as conn:
@@ -259,10 +265,12 @@ def trace(
     with db_conn() as conn:
         for req_id, uuid in req_dict.items():
             if req_id in req_map:
-                linked = [name for name, _ in req_map[req_id]]
-                statuses = [status for _, status in req_map[req_id]]
+                suite_src = [ src for src, _, _ in req_map[req_id] ]
+                linked = [name for _, name, _ in req_map[req_id]]
+                statuses = [status for _, _, status in req_map[req_id]]
                 overall_status = "FAILED" if "FAIL" in statuses else "PASSED"
             else:
+                suite_src = []
                 linked = []
                 overall_status = "NOT TESTED"
 
@@ -273,6 +281,7 @@ def trace(
             for test_name in linked or [""]:
                 rows.append({
                     "REQ-ID": req_id,
+                    "suite": ", ".join(suite_src) if isinstance(suite_src, list) else suite_src,
                     "linked_test": test_name,
                     "STATUS": overall_status if test_name else "NOT TESTED"
                 })
@@ -283,7 +292,7 @@ def trace(
     # Output CSV
     if format == "csv":
         with open(output, "w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=["REQ-ID", "linked_test", "STATUS"])
+            writer = csv.DictWriter(f, fieldnames=["REQ-ID", "suite", "linked_test", "STATUS"])
             writer.writeheader()
             writer.writerows(rows)
         typer.echo(f"Traceability CSV report saved to {output}")

@@ -16,3 +16,9 @@
   linked_tests: []
   type: functional
   uuid: 483eb6fe-7c1d-40f6-81bb-dd1069d8ebdd
+- description: extra req
+  domain: logging
+  id: REQ-004
+  linked_tests: []
+  type: functional
+  uuid: c0f3ba54-f431-484a-b06c-0652387fda3d

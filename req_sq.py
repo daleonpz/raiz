@@ -21,7 +21,6 @@ sync_app = typer.Typer()
 app.add_typer(list_app, name="list", help="List requirements, types, or domains")
 app.add_typer(sync_app, name="sync", help="Sync requirements with YAML file")
 
-    
 console = Console()
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

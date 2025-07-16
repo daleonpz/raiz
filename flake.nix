@@ -20,6 +20,7 @@
         cmake
         gnumake
         gcc
+        sqlite
         python
         pythonPackages.pip
         pythonPackages.setuptools
@@ -30,6 +31,7 @@
         pythonPackages.black
         pythonPackages.ruff
         pythonPackages.pyyaml
+        pythonPackages.rich
       ];
      
       shellHook = ''

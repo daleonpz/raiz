@@ -16,7 +16,7 @@ test: all
 	pytest tests
 
 robot: all
-	robot robot/test_math.robot
+	robot robot/.
 
 lint:
 	ruff check .

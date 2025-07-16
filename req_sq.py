@@ -1,3 +1,6 @@
+# Copyright (c) 2025 Daniel Paredes (daleonpz)
+# SPDX-License-Identifier: Apache-2.0
+
 import typer
 import sqlite3
 import uuid
@@ -14,6 +17,12 @@ import rich
 from rich.console import Console
 from rich.table import Table
 from collections import defaultdict
+
+# TODO: 
+# - clean code, split into modules
+# - add 'reports' folder
+# - make it professional, readme, github actions, etc.
+# - build package with setup.py 
 
 app = typer.Typer()
 list_app = typer.Typer()

@@ -10,12 +10,18 @@ import csv
 import os
 import json
 from datetime import datetime
+import rich
+from rich.console import Console
+from rich.table import Table
 
 app = typer.Typer()
 list_app = typer.Typer()
 sync_app = typer.Typer()
 app.add_typer(list_app, name="list", help="List requirements, types, or domains")
 app.add_typer(sync_app, name="sync", help="Sync requirements with YAML file")
+
+    
+console = Console()
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -72,7 +78,7 @@ def add():
         )
         conn.commit()
 
-    typer.echo("Requirement added.")
+    console.print(f"[bold green]REQ-{seq_no:03} added[/bold green]")
 
 
 @app.command()
@@ -83,8 +89,7 @@ def rm(seq_no: int):
         conn.execute("DELETE FROM requirements WHERE seq_no = ?", (seq_no,))
         conn.commit()
     renumber_all()
-    typer.echo(f"Removed REQ-{seq_no:03} and renumbered.")
-
+    console.print(f"[bold red]REQ-{seq_no:03} removed and renumbered[/bold red]")
 
 @list_app.command("all")
 def list_all(
@@ -105,31 +110,48 @@ def list_all(
 
     with db_conn() as conn:
         cur = conn.execute(query, params)
+        req_table = Table(show_header=True, header_style="bold magenta")
+        req_table.add_column("REQ-ID", style="cyan")
+        req_table.add_column("Description", style="white")
+        req_table.add_column("Type", style="green")
+        req_table.add_column("Domain", style="yellow")
+
         for row in cur.fetchall():
-            typer.echo(f"REQ-{row['seq_no']:03}: {row['description']} [{row['type']}, {row['domain']}]")
+            req_table.add_row(
+                f"REQ-{row['seq_no']:03}",
+                row["description"],
+                row["type"],
+                row["domain"]
+            )
+
+        console.print(req_table)
+
 
 @list_app.command("types")
 def list_types():
     """List all unique requirement types."""
     init_db()
     with db_conn() as conn:
+        types_table = Table(show_header=True, header_style="bold magenta")
         cur = conn.execute("SELECT DISTINCT type FROM requirements")
         types = sorted(row["type"] for row in cur.fetchall())
-        typer.echo("Types:")
+        types_table.add_column("Requirement Types", style="cyan")
         for t in types:
-            typer.echo(f"- {t}")
+            types_table.add_row(t)
+        console.print(types_table)
 
 @list_app.command("domains")
 def list_domains():
     """List all unique requirement domains."""
     init_db()
     with db_conn() as conn:
+        domains_table = Table(show_header=True, header_style="bold magenta")
         cur = conn.execute("SELECT DISTINCT domain FROM requirements")
         domains = sorted(row["domain"] for row in cur.fetchall())
-        typer.echo("Domains:")
+        domains_table.add_column("Requirement Domains", style="cyan")
         for d in domains:
-            typer.echo(f"- {d}")
-
+            domains_table.add_row(d)
+        console.print(domains_table)
 
 @sync_app.command("to-yaml")
 def sync_to_yaml():
@@ -150,14 +172,14 @@ def sync_to_yaml():
 
     with open(REQ_FILE, "w") as f:
         yaml.dump(reqs, f)
-    typer.echo(f"Exported {len(reqs)} requirements to {REQ_FILE}")
 
+    console.print(f"[bold green]Exported {len(reqs)} requirements to {REQ_FILE}[/bold green]")
 
 @sync_app.command("from-yaml")
 def sync_from_yaml():
     """Import requirements from YAML into SQLite (overwrites DB)."""
     if not REQ_FILE.exists():
-        typer.echo("requirements.yaml not found.")
+        console.print("[bold red]Error: requirements.yaml not found.[/bold red]")
         raise typer.Exit()
 
     with open(REQ_FILE, "r") as f:
@@ -179,8 +201,7 @@ def sync_from_yaml():
                 )
             )
         conn.commit()
-    typer.echo(f"Imported {len(reqs)} requirements from {REQ_FILE}")
-
+    console.print(f"[bold green]Requirements imported from {REQ_FILE}[/bold green]")
 
 @app.command()
 def update(
@@ -195,19 +216,19 @@ def update(
         cur = conn.execute("SELECT * FROM requirements WHERE seq_no = ?", (seq_no,))
         row = cur.fetchone()
         if not row:
-            typer.echo(f"Requirement REQ-{seq_no:03} not found.")
+            console.print("[bold red]Requirement REQ-{seq_no:03} not found.[/bold red]")
             raise typer.Exit()
 
         if field:
             if field not in {"description", "type", "domain"}:
-                typer.echo("Only 'description', 'type', and 'domain' can be updated.")
+                console.print("[bold red]Invalid field. Only 'description', 'type', and 'domain' can be updated.[/bold red]")
                 raise typer.Exit()
             conn.execute(f"UPDATE requirements SET {field} = ? WHERE seq_no = ?", (new_value, seq_no))
             conn.commit()
-            typer.echo(f"Updated REQ-{seq_no:03}: set {field} to '{new_value}'")
+            console.print(f"[bold green]Updated REQ-{seq_no:03}: set {field} to '{new_value}'[/bold green]")
         else:
             # Interactive prompt
-            typer.echo(f"Updating REQ-{seq_no:03}")
+            console.print(f"[bold yellow]Updating REQ-{seq_no:03} interactively...[/bold yellow]")
             description = typer.prompt("Description", default=row["description"])
             req_type = typer.prompt("Type [functional, non-functional, constraint]", default=row["type"])
             domain = typer.prompt("Domain [e.g., logging, ble, data-processing]", default=row["domain"])
@@ -218,22 +239,21 @@ def update(
                 WHERE seq_no = ?
             """, (description, req_type, domain, seq_no))
             conn.commit()
-            typer.echo(f"Updated REQ-{seq_no:03}")
+            console.print(f"[bold green]REQ-{seq_no:03} updated successfully![/bold green]")
 
 
 #TODO: 
 # pimp the traceability report with more details, specially html
 # show a more beautiful report with links to the tests
-# typer.echo should print in a table format and with colors , use Rich instead
 # Tests: what if i implement a test without a REQ-ID?
-# Remove: linked_tests from database, it is not needed anymore
 # trace should also support console
+# filter trace by type, domain, status
 # add directory "reports" something like to store the reports
 @app.command()
 def trace(
-    output: str = typer.Option("traceability", help="Output report filename (CSV, JSON or HTML)"),
+    output: str = typer.Option("traceability", help="Output report to the console or a file (CSV or JSON)"),
     robot_output: str = typer.Option("output.xml", help="Path to Robot Framework output.xml"),
-    format: str = typer.Option("csv", help="Output format: csv, json or html"),
+    format: str = typer.Option("console", help="Output format: console, csv or json"),
     update_db: bool = typer.Option(False, help="Do not update SQLite linked_tests field")
 ):
     """
@@ -241,8 +261,9 @@ def trace(
     """
     init_db()
 
+
     if not Path(robot_output).exists():
-        typer.echo(f"Robot output file {robot_output} not found.")
+        console.print(f"[bold red]Robot output file {robot_output} not found.[/bold red]")
         raise typer.Exit()
 
     result = ExecutionResult(robot_output)
@@ -253,7 +274,6 @@ def trace(
     root_source = result.suite.source
     get_filename = lambda root, suite_src : os.path.basename(suite_src)
 
-    logging.info(f"Root suite source: {root_source}")
     for suite in result.suite.suites:
         suite_filename = get_filename(root_source, suite.source)
         for test in suite.tests:
@@ -261,7 +281,7 @@ def trace(
                 if tag.startswith("REQ-"):
                     if tag not in req_map:
                         req_map[tag] = []
-                    logging.info(f"Linking {tag} to test {test.name} with status {test.status} from suite {suite_filename}")
+                    logging.debug(f"Linking {tag} to test {test.name} with status {test.status} from suite {suite_filename}")
                     req_map[tag].append((suite_filename, test.name, test.status))
 
 
@@ -315,74 +335,70 @@ def trace(
     coverage = (num_passed_test + num_fail_test) / total_req * 100 if total_req > 0 else 0
     percentage_passed = num_passed_test / total_tests * 100 if total_tests > 0 else 0
 
-    typer.echo(f"Total Requirements: {total_req}")
-    typer.echo(f"Total Tests: {total_tests}")
-    typer.echo(f"Passed Tests: {num_passed_test} ({percentage_passed:.2f}%)")
-    typer.echo(f"Failed Tests: {num_fail_test}")
-    typer.echo(f"Ignored Tests: {num_ignored_test}")
-    typer.echo(f"Coverage: {coverage:.2f}%")
+    cov_report = {
+        "total_requirements": total_req,
+        "total_tests": total_tests,
+        "passed_tests": percentage_passed,
+        "ignored_tests": num_ignored_test,
+        "coverage_percentage": coverage,
+    }
+
+    report = {
+        "timestamp": datetime.now().isoformat(),
+        "coverage": cov_report,
+        "report": rows,
+    }
 
     # Output CSV
-    if format == "csv":
+    if format == "console":
+       generate_console_report(report)
+    elif format == "csv":
+        generate_csv_report(report, output)
         output = output if output.endswith(".csv") else f"{output}.csv"
         with open(output, "w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=["REQ-ID", "STATUS", "suite", "linked_test"])
             writer.writeheader()
             writer.writerows(rows)
-        typer.echo(f"Traceability CSV report saved to {output}")
+        console.print(f"[bold green]Traceability CSV report saved to {output}[/bold green]")
     elif format == "json":
         output = output if output.endswith(".json") else f"{output}.json"
         with open(output, "w") as f:
             json.dump(rows, f, indent=4)
-        typer.echo(f"Traceability JSON report saved to {output}")
-    elif format == "html":
-        output = output if output.endswith(".html") else f"{output}.html"
-        generate_html_report(rows, output)
-        typer.echo(f"Traceability HTML report saved to {output}")
+        console.print(f"[bold green]Traceability JSON report saved to {output}[/bold green]")
     else:
-        typer.echo("Invalid format. Use 'csv' or 'html'.")
+        console.print("[bold red]Invalid format. Use 'console', 'csv', or 'json'.[/bold red]")
 
+def generate_console_report(report):
+    """Generate a console report from traceability data."""
+    
+    ## print Timestamp
+    console.print(f"[bold green]Traceability Report - {report['timestamp']}[/bold green]")
 
-def generate_html_report(rows, output):
-    """Generate a simple HTML report from traceability data."""
-    html_content = """
-    <html>
-    <head>
-        <title>Traceability Report</title>
-        <style>
-            table { width: 100%; border-collapse: collapse; }
-            th, td { border: 1px solid black; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-        </style>
-    </head>
-    <body>
-        <h1>Traceability Report</h1>
-        <table>
-            <tr>
-                <th>REQ-ID</th>
-                <th>Suite</th>
-                <th>Linked Test</th>
-                <th>Status</th>
-            </tr>
-    """
-    for row in rows:
-        html_content += f"""
-            <tr>
-                <td>{row['REQ-ID']}</td>
-                <td>{row['STATUS']}</td>
-                <td>{row['suite']}</td>
-                <td>{row['linked_test']}</td>
-            </tr>
-        """
-    html_content += """
-        </table>
-    </body>
-    </html>
-    """
+    ## Coverage Summary in another table
+    cov_table = Table(title="Coverage Summary", show_header=True, header_style="bold blue")
+    cov_table.add_column("Total Requirements", style="dim")
+    cov_table.add_column("Total Tests", style="dim")
+    cov_table.add_column("Passed Tests (%)", style="green")
+    cov_table.add_column("Ignored Tests", style="yellow")
+    cov_table.add_column("Req. Coverage (%)", style="bold")
+    cov_table.add_row(
+        str(report["coverage"]["total_requirements"]),
+        str(report["coverage"]["total_tests"]),
+        f"{report['coverage']['passed_tests']:.2f}%",
+        str(report["coverage"]["ignored_tests"]),
+        f"{report['coverage']['coverage_percentage']:.2f}%",
+            )
 
-    with open(output, "w") as f:
-        f.write(html_content)
-
+    console.print(cov_table)
+    table = Table(title="Traceability Report", show_header=True, header_style="bold magenta")
+    table.add_column("REQ-ID", style="cyan")
+    table.add_column("Status", style="green")
+    table.add_column("Suite", style="yellow")
+    table.add_column("Linked Test", style="blue")
+    for row in report["report"]:
+        table.add_row(row["REQ-ID"], row["STATUS"], row["suite"], row["linked_test"] or "N/A")
+    
+    console.print(table)
 
 if __name__ == "__main__":
     app()

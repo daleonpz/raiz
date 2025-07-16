@@ -31,6 +31,7 @@
         pythonPackages.black
         pythonPackages.ruff
         pythonPackages.pyyaml
+        pythonPackages.rich
       ];
      
       shellHook = ''

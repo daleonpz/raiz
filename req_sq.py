@@ -243,12 +243,8 @@ def update(
 
 
 #TODO: 
-# pimp the traceability report with more details, specially html
-# show a more beautiful report with links to the tests
 # Tests: what if i implement a test without a REQ-ID?
-# trace should also support console
 # filter trace by type, domain, status
-# add directory "reports" something like to store the reports
 @app.command()
 def trace(
     output: str = typer.Option("traceability", help="Output report to the console or a file (CSV or JSON)"),
@@ -349,33 +345,41 @@ def trace(
         "report": rows,
     }
 
-    # Output CSV
     if format == "console":
        generate_console_report(report)
     elif format == "csv":
         generate_csv_report(report, output)
-        output = output if output.endswith(".csv") else f"{output}.csv"
-        with open(output, "w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=["REQ-ID", "STATUS", "suite", "linked_test"])
-            writer.writeheader()
-            writer.writerows(rows)
         console.print(f"[bold green]Traceability CSV report saved to {output}[/bold green]")
     elif format == "json":
-        output = output if output.endswith(".json") else f"{output}.json"
-        with open(output, "w") as f:
-            json.dump(rows, f, indent=4)
+        generate_json_report(report, output)
         console.print(f"[bold green]Traceability JSON report saved to {output}[/bold green]")
     else:
         console.print("[bold red]Invalid format. Use 'console', 'csv', or 'json'.[/bold red]")
 
+## Generate reports in different formats
+def generate_csv_report(report, output):
+    """Generate a CSV report from traceability data."""
+    output = output if output.endswith(".csv") else f"{output}.csv"
+
+    with open(output, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=["REQ-ID", "STATUS", "suite", "linked_test"])
+        writer.writeheader()
+        for row in report["report"]:
+            writer.writerow(row)
+
+def generate_json_report(report, output):
+    """Generate a JSON report from traceability data."""
+    output = output if output.endswith(".json") else f"{output}.json"
+
+    with open(output, "w") as f:
+        json.dump(report, f, indent=4)
+
 def generate_console_report(report):
     """Generate a console report from traceability data."""
-    
-    ## print Timestamp
-    console.print(f"[bold green]Traceability Report - {report['timestamp']}[/bold green]")
 
-    ## Coverage Summary in another table
-    cov_table = Table(title="Coverage Summary", show_header=True, header_style="bold blue")
+    console.print("[blink][bold green]Traceability Report - " + report['timestamp'] + "[/blink][/bold green]", justify="center")
+
+    cov_table = Table(title="Requirements Coverage Summary", show_header=True, header_style="bold blue")
     cov_table.add_column("Total Requirements", style="dim")
     cov_table.add_column("Total Tests", style="dim")
     cov_table.add_column("Passed Tests (%)", style="green")
@@ -390,6 +394,7 @@ def generate_console_report(report):
             )
 
     console.print(cov_table)
+
     table = Table(title="Traceability Report", show_header=True, header_style="bold magenta")
     table.add_column("REQ-ID", style="cyan")
     table.add_column("Status", style="green")

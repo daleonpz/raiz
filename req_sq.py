@@ -224,9 +224,11 @@ def update(
 #TODO: 
 # pimp the traceability report with more details, specially html
 # show a more beautiful report with links to the tests
-# typer.echo should print in a table format and with colors
+# typer.echo should print in a table format and with colors , use Rich instead
 # Tests: what if i implement a test without a REQ-ID?
 # Remove: linked_tests from database, it is not needed anymore
+# trace should also support console
+# add directory "reports" something like to store the reports
 @app.command()
 def trace(
     output: str = typer.Option("traceability", help="Output report filename (CSV, JSON or HTML)"),

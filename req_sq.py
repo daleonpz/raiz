@@ -13,6 +13,7 @@ from datetime import datetime
 import rich
 from rich.console import Console
 from rich.table import Table
+from collections import defaultdict
 
 app = typer.Typer()
 list_app = typer.Typer()
@@ -24,6 +25,7 @@ app.add_typer(sync_app, name="sync", help="Sync requirements with YAML file")
 console = Console()
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+# logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
 DB_FILE = "requirements.db"
 REQS_DIR = Path("requirements")
@@ -242,21 +244,20 @@ def update(
             console.print(f"[bold green]REQ-{seq_no:03} updated successfully![/bold green]")
 
 
-#TODO: 
-# Tests: what if i implement a test without a REQ-ID?
-# filter trace by type, domain, status
 @app.command()
 def trace(
-    output: str = typer.Option("traceability", help="Output report to the console or a file (CSV or JSON)"),
+    output: str = typer.Option("traceability", help="Output report to console or a file (CSV or JSON)"),
     robot_output: str = typer.Option("output.xml", help="Path to Robot Framework output.xml"),
     format: str = typer.Option("console", help="Output format: console, csv or json"),
-    update_db: bool = typer.Option(False, help="Do not update SQLite linked_tests field")
+    update_db: bool = typer.Option(False, help="Update SQLite with linked_tests"),
+    domain: Optional[str] = typer.Option(None, help="Filter by domain"),
+    type: Optional[str] = typer.Option(None, help="Filter by requirement type"),
+    detail: bool = typer.Option(False, help="Show detailed trace report (only in console)")
 ):
     """
     Generate traceability report linking REQ-IDs to Robot tests.
     """
     init_db()
-
 
     if not Path(robot_output).exists():
         console.print(f"[bold red]Robot output file {robot_output} not found.[/bold red]")
@@ -264,8 +265,9 @@ def trace(
 
     result = ExecutionResult(robot_output)
 
-    # Map: REQ-ID → list of (suite file name, test name, status)
-    req_map = {}
+    # Gather test → REQ links
+    req_map = defaultdict(list)
+    orphan_tests = []
 
     root_source = result.suite.source
     get_filename = lambda root, suite_src : os.path.basename(suite_src)
@@ -275,88 +277,206 @@ def trace(
         for test in suite.tests:
             for tag in test.tags:
                 if tag.startswith("REQ-"):
-                    if tag not in req_map:
-                        req_map[tag] = []
-                    logging.debug(f"Linking {tag} to test {test.name} with status {test.status} from suite {suite_filename}")
                     req_map[tag].append((suite_filename, test.name, test.status))
 
-
-    # Load existing requirements from DB
     with db_conn() as conn:
-        cur = conn.execute("SELECT uuid, seq_no FROM requirements")
-        req_dict = {f"REQ-{row['seq_no']:03}": row["uuid"] for row in cur.fetchall()}
+        cur = conn.execute("SELECT uuid, seq_no, type, domain FROM requirements")
+        reqs = cur.fetchall()
+        req_dict = {f"REQ-{row['seq_no']:03}": row for row in reqs}
 
-    rows = []
-
-    total_req = len(req_dict)
-    num_fail_test = 0
-    num_passed_test = 0
-    num_ignored_test = 0
+    req_report = defaultdict(dict)
+    total_req = 0
+    num_passed = num_failed = 0
 
     with db_conn() as conn:
-        for req_id, uuid in req_dict.items():
+        for req_id, data in req_dict.items():
+            if (type and data["type"] != type) or (domain and data["domain"] != domain):
+                continue
+            total_req += 1
+
+            uuid = data["uuid"]
             if req_id in req_map:
-                suite_src = [ src for src, _, _ in req_map[req_id] ]
-                linked = [name for _, name, _ in req_map[req_id]]
-                statuses = [status for _, _, status in req_map[req_id]]
-                overall_status = "FAILED" if "FAIL" in statuses else "PASSED"
-                if overall_status == "PASSED":
-                    num_passed_test += 1
-                elif overall_status == "FAILED":
-                    num_fail_test += 1
+                suite_src = [s for s, _, _ in req_map[req_id]]
+                linked = [t for _, t, _ in req_map[req_id]]
+                statuses = [s for _, _, s in req_map[req_id]]
+                overall = "FAILED" if "FAIL" in statuses else "PASSED"
+                if overall == "PASSED":
+                    num_passed += 1
                 else:
-                    num_ignored_test += 1
+                    num_failed += 1
             else:
-                suite_src = []
-                linked = []
-                overall_status = "NOT TESTED"
+                suite_src, linked, overall = [], [], "NOT TESTED"
 
             if update_db:
-                conn.execute("UPDATE requirements SET linked_tests = ? WHERE uuid = ?",
-                             (",".join(linked), uuid))
+                conn.execute("UPDATE requirements SET linked_tests = ? WHERE uuid = ?", (",".join(linked), uuid))
 
             for test_name in linked or [""]:
-                rows.append({
+                req_report[uuid] = {
                     "REQ-ID": req_id,
-                    "STATUS": overall_status if test_name else "NOT TESTED",
+                    "STATUS": overall if test_name else "NOT TESTED",
                     "suite": ", ".join(suite_src) if isinstance(suite_src, list) else suite_src,
                     "linked_test": test_name,
-                })
+                }
 
+        if detail:
+            cur = conn.execute("SELECT DISTINCT domain FROM requirements")
+            domains = sorted(row["domain"] for row in cur.fetchall())
+    
+            cur = conn.execute("SELECT DISTINCT type FROM requirements")
+            types = sorted(row["type"] for row in cur.fetchall())
+
+            domain_stats = defaultdict(lambda: {"total": 0, "tested": 0, "passed": 0})
+            type_stats = defaultdict(lambda: {"total": 0, "tested": 0, "passed": 0})
+
+            for domain in domains:
+                cur = conn.execute( "SELECT COUNT(*) FROM requirements WHERE domain = ?", (domain,))
+                domain_stats[domain]["total"] = cur.fetchone()[0]
+
+                cur = conn.execute(
+                    "SELECT uuid FROM requirements WHERE domain = ? AND linked_tests != ''",
+                    (domain,)
+                )
+                fetched_data = cur.fetchall()
+                domain_stats[domain]["tested"] = len(fetched_data)
+
+                dom_passed = [ req_report[row["uuid"]]["STATUS"] for row in fetched_data if row["uuid"] in req_report ]
+                logging.debug(f"Domain {domain} passed statuses: {dom_passed}")
+                domain_stats[domain]["passed"] = (dom_passed.count("PASSED") / len(dom_passed) * 100) if dom_passed else 0
+
+            for typ in types:
+                cur = conn.execute("SELECT COUNT(*) FROM requirements WHERE type = ?", (typ,))
+                type_stats[typ]["total"] = cur.fetchone()[0]
+
+                cur = conn.execute(
+                    "SELECT uuid FROM requirements WHERE type = ? AND linked_tests != ''",
+                    (typ,)
+                )
+                fetched_data = cur.fetchall()
+                type_stats[typ]["tested"] = len(fetched_data)
+
+                typ_passed = [ req_report[row["uuid"]]["STATUS"] for row in fetched_data if row["uuid"] in req_report ]
+                logging.debug(f"Type {typ} passed statuses: {typ_passed}")
+                type_stats[typ]["passed"] = (typ_passed.count("PASSED") / len(typ_passed) * 100) if typ_passed else 0
+    
         if update_db:
             conn.commit()
 
     # Coverage
-    total_tests = num_passed_test + num_fail_test + num_ignored_test
-    coverage = (num_passed_test + num_fail_test) / total_req * 100 if total_req > 0 else 0
-    percentage_passed = num_passed_test / total_tests * 100 if total_tests > 0 else 0
-
-    cov_report = {
-        "total_requirements": total_req,
-        "total_tests": total_tests,
-        "passed_tests": percentage_passed,
-        "ignored_tests": num_ignored_test,
-        "coverage_percentage": coverage,
-    }
+    total_tests = num_passed + num_failed
+    coverage = (total_tests / total_req * 100) if total_req else 0
+    pass_rate = (num_passed / total_tests * 100) if total_tests else 0
 
     report = {
         "timestamp": datetime.now().isoformat(),
-        "coverage": cov_report,
-        "report": rows,
+        "coverage": {
+            "total_requirements": total_req,
+            "total_tests": total_tests,
+            "passed_tests": pass_rate,
+            "ignored_tests": total_req - total_tests,
+            "coverage_percentage": coverage,
+        },
+        "report": req_report,
     }
 
+    if detail:
+        detailed = defaultdict(dict)
+        detailed["domains"] = domain_stats
+        detailed["types"] = type_stats
+        report["detail_coverage"] = detailed
+
+    # Output
     if format == "console":
-       generate_console_report(report)
+        generate_console_report(report)
     elif format == "csv":
         generate_csv_report(report, output)
-        console.print(f"[bold green]Traceability CSV report saved to {output}[/bold green]")
+        console.print(f"[green]Traceability CSV report saved to {output}[/green]")
     elif format == "json":
         generate_json_report(report, output)
-        console.print(f"[bold green]Traceability JSON report saved to {output}[/bold green]")
+        console.print(f"[green]Traceability JSON report saved to {output}[/green]")
     else:
-        console.print("[bold red]Invalid format. Use 'console', 'csv', or 'json'.[/bold red]")
+        console.print("[bold red]Invalid format. Use console, csv, or json.[/bold red]")
+
 
 ## Generate reports in different formats
+def generate_console_report(report: dict):
+    """Generate a console report from traceability data."""
+
+    console = Console()
+    console.print(f"[blink][bold green]Traceability Report - {report['timestamp']}[/blink][/bold green]", justify="center")
+
+    # --- Requirements Coverage Summary ---
+    cov_table = Table(title="Requirements Coverage Summary", show_header=True, header_style="bold blue")
+    cov_table.add_column("Total Requirements", style="dim")
+    cov_table.add_column("Total Tests", style="dim")
+    cov_table.add_column("Passed Tests (%)", style="green")
+    cov_table.add_column("Ignored Tests", style="yellow")
+    cov_table.add_column("Req. Coverage (%)", style="bold")
+
+    cov = report["coverage"]
+    cov_table.add_row(
+        str(cov["total_requirements"]),
+        str(cov["total_tests"]),
+        f"{cov['passed_tests']:.2f}%",
+        str(cov["ignored_tests"]),
+        f"{cov['coverage_percentage']:.2f}%",
+    )
+    console.print(cov_table)
+
+    # --- Traceability Table ---
+    trace_table = Table(title="Traceability Report", show_header=True, header_style="bold magenta")
+    trace_table.add_column("REQ-ID", style="cyan", no_wrap=True)
+    trace_table.add_column("Status", style="green")
+    trace_table.add_column("Suite", style="yellow")
+    trace_table.add_column("Linked Test", style="blue")
+
+    req_report = list(report["report"].values())
+    for row in req_report:
+        trace_table.add_row(
+            row["REQ-ID"],
+            row["STATUS"],
+            row["suite"] or "-",
+            row["linked_test"] or "-"
+        )
+    console.print(trace_table)
+
+    # --- Detailed Domain/Type Coverage ---
+    if "detail_coverage" in report:
+        detail_table = Table(title="Coverage per Domain", header_style="bold cyan")
+        detail_table.add_column("Domain", style="magenta")
+        detail_table.add_column("Total REQs", justify="right")
+        detail_table.add_column("Tested", justify="right")
+        detail_table.add_column("Passed %", justify="right")
+        detail_table.add_column("Coverage %", justify="right")
+
+        for domain, stats in report["detail_coverage"]["domains"].items():
+            coverage_pct = (stats["tested"] / stats["total"] * 100) if stats["total"] else 0
+            detail_table.add_row(
+                domain,
+                str(stats["total"]),
+                str(stats["tested"]),
+                str(stats["passed"]),
+                f"{coverage_pct:.2f}%"
+            )
+        console.print(detail_table)
+
+        type_table = Table(title="Coverage per Type", header_style="bold cyan")
+        type_table.add_column("Type", style="magenta")
+        type_table.add_column("Total REQs", justify="right")
+        type_table.add_column("Tested", justify="right")
+        type_table.add_column("Passed %", justify="right")
+        type_table.add_column("Coverage %", justify="right")
+        for typ, stats in report["detail_coverage"]["types"].items():
+            coverage_pct = (stats["tested"] / stats["total"] * 100) if stats["total"] else 0
+            type_table.add_row(
+                typ,
+                str(stats["total"]),
+                str(stats["tested"]),
+                str(stats["passed"]),
+                f"{coverage_pct:.2f}%"
+            )
+        console.print(type_table)
+
+
 def generate_csv_report(report, output):
     """Generate a CSV report from traceability data."""
     output = output if output.endswith(".csv") else f"{output}.csv"
@@ -364,7 +484,8 @@ def generate_csv_report(report, output):
     with open(output, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=["REQ-ID", "STATUS", "suite", "linked_test"])
         writer.writeheader()
-        for row in report["report"]:
+        req_report = list(report["report"].values())
+        for row in req_report:
             writer.writerow(row)
 
 def generate_json_report(report, output):
@@ -374,36 +495,6 @@ def generate_json_report(report, output):
     with open(output, "w") as f:
         json.dump(report, f, indent=4)
 
-def generate_console_report(report):
-    """Generate a console report from traceability data."""
-
-    console.print("[blink][bold green]Traceability Report - " + report['timestamp'] + "[/blink][/bold green]", justify="center")
-
-    cov_table = Table(title="Requirements Coverage Summary", show_header=True, header_style="bold blue")
-    cov_table.add_column("Total Requirements", style="dim")
-    cov_table.add_column("Total Tests", style="dim")
-    cov_table.add_column("Passed Tests (%)", style="green")
-    cov_table.add_column("Ignored Tests", style="yellow")
-    cov_table.add_column("Req. Coverage (%)", style="bold")
-    cov_table.add_row(
-        str(report["coverage"]["total_requirements"]),
-        str(report["coverage"]["total_tests"]),
-        f"{report['coverage']['passed_tests']:.2f}%",
-        str(report["coverage"]["ignored_tests"]),
-        f"{report['coverage']['coverage_percentage']:.2f}%",
-            )
-
-    console.print(cov_table)
-
-    table = Table(title="Traceability Report", show_header=True, header_style="bold magenta")
-    table.add_column("REQ-ID", style="cyan")
-    table.add_column("Status", style="green")
-    table.add_column("Suite", style="yellow")
-    table.add_column("Linked Test", style="blue")
-    for row in report["report"]:
-        table.add_row(row["REQ-ID"], row["STATUS"], row["suite"], row["linked_test"] or "N/A")
-    
-    console.print(table)
 
 if __name__ == "__main__":
     app()

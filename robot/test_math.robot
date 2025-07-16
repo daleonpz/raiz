@@ -18,3 +18,10 @@ Multiply Boundaries
     ${result}=    Multiply    ${LOW}    ${HIGH}
     Should Be Equal As Integers   ${result}    0
 
+Random Test
+    [Documentation]    This is a random test without requirement.
+    [Tags]    Orphan
+    ${result}=    Multiply    3     3
+    Should Be Equal As Integers  ${result}   9
+
+

@@ -41,4 +41,18 @@ digraph G {
 }
 ```
 
+```mermaid
+sequenceDiagram
+actor Alice as Alice
+actor Bob as Bob
+actor A1 as New Actor
 
+Note right of Alice: A typical message
+Alice ->> Bob: HimmsdnoteoverA1: aeu
+Alice ->> A1: send
+A1 --) Alice: receive
+A1 --) Bob: new msg
+Bob ->> Bob: new msg
+Bob ->> Alice: Hi Alice
+
+```

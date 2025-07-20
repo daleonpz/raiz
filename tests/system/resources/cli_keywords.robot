@@ -33,7 +33,7 @@ List Requirements As JSON
     RETURN       ${parsed}
 
 Sync From YAML
-    Run CLI Command    sync from-yaml
+    Run CLI Command    sync from-yaml --file .requirements_test.yaml
 
 Sync To YAML
-    Run CLI Command    sync to-yaml
+    Run CLI Command    sync to-yaml --file .requirements_test.yaml

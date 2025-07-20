@@ -1,5 +1,5 @@
 *** Settings ***
-Suite Setup       Remove Reports Folder
+Suite Teardown    Remove Reports Folder
 Resource          resources/cli_keywords.robot
 
 *** Test Cases ***
@@ -41,7 +41,7 @@ Remove Requirement Should Renumber
 Export To YAML Should Match DB State
     ${reqs1}=           List Requirements As JSON
     Sync To YAML
-    ${file}=            Get File    requirements/requirements.yaml
+    ${file}=            Get File    .requirements_test.yaml
     Should Contain      ${file}    ${reqs1[0]["description"]}
     Should Contain      ${file}    ${reqs1[1]["description"]}
 
@@ -58,5 +58,5 @@ Import From YAML Should Restore Requirements
 *** Keywords ***
 Remove Reports Folder
     Remove Directory    .reqtrace    recursive=True
-    Remove File         requirements/requirements.yaml
+    Remove File         .requirements_test.yaml
 

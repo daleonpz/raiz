@@ -1,4 +1,5 @@
 *** Settings ***
+Suite Setup       Save State
 Suite Teardown    Remove Reports Folder
 Resource          resources/cli_keywords.robot
 
@@ -59,4 +60,8 @@ Import From YAML Should Restore Requirements
 Remove Reports Folder
     Remove Directory    .reqtrace    recursive=True
     Remove File         .requirements_test.yaml
+    Remove File         requirements.db
+    Move File           requirements.db.orig    requirements.db
 
+Save State
+    Move File           requirements.db     requirements.db.orig

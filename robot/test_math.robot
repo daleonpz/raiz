@@ -24,4 +24,9 @@ Random Test
     ${result}=    Multiply    3     3
     Should Be Equal As Integers  ${result}   9
 
+Multiply Boundaries Low
+    [Documentation]    This test case verifies the multiplication of boundary values.
+    [Tags]    REQ-003   REQ-002     Multiply
+    ${result}=    Multiply    ${HIGH}    ${HIGH}
+    Should Be Equal As Integers   ${result}    100
 

@@ -105,6 +105,7 @@ def rm(seq_no: int):
 def list_all(
     type: Optional[str] = typer.Option(None, help="Filter by type"),
     domain: Optional[str] = typer.Option(None, help="Filter by domain"),
+    json: Optional[bool] = typer.Option(False, help="Output in JSON format"),
 ):
     """List all requirements, with optional filters."""
     init_db()
@@ -120,21 +121,35 @@ def list_all(
 
     with db_conn() as conn:
         cur = conn.execute(query, params)
-        req_table = Table(show_header=True, header_style="bold magenta")
-        req_table.add_column("REQ-ID", style="cyan")
-        req_table.add_column("Description", style="white")
-        req_table.add_column("Type", style="green")
-        req_table.add_column("Domain", style="yellow")
 
-        for row in cur.fetchall():
-            req_table.add_row(
-                f"REQ-{row['seq_no']:03}",
-                row["description"],
-                row["type"],
-                row["domain"]
-            )
+        if not json:
+            req_table = Table(show_header=True, header_style="bold magenta")
+            req_table.add_column("REQ-ID", style="cyan")
+            req_table.add_column("Description", style="white")
+            req_table.add_column("Type", style="green")
+            req_table.add_column("Domain", style="yellow")
 
-        console.print(req_table)
+            for row in cur.fetchall():
+                req_table.add_row(
+                    f"REQ-{row['seq_no']:03}",
+                    row["description"],
+                    row["type"],
+                    row["domain"]
+                )
+
+            console.print(req_table)
+        else:
+            requirements = []
+            for row in cur.fetchall():
+                requirements.append({
+                    "id": f"REQ-{row['seq_no']:03}",
+                    "uuid": row["uuid"],
+                    "description": row["description"],
+                    "type": row["type"],
+                    "domain": row["domain"],
+                    "linked_tests": row["linked_tests"].split(",") if row["linked_tests"] else [],
+                })
+            console.print_json(data=requirements, indent=2)
 
 
 @list_app.command("types")

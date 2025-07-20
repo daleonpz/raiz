@@ -10,14 +10,14 @@ ${CMD}            python3 req.py
 *** Keywords ***
 Run CLI Command
     [Arguments]    ${args}
-    ${result}=     Run Process    ${CMD} ${args}    shell=True    stdout=PIPE    stderr=PIPE
+    ${result}=     Run Process    ${CMD} ${args}    shell=True
     Should Be Equal As Integers    ${result.rc}    0
     RETURN       ${result.stdout}
 
 Add Requirement
     [Arguments]    ${desc}    ${type}    ${domain}
     ${input}=      Catenate    SEPARATOR=\n    ${desc}    ${type}    ${domain}
-    Run Process    ${CMD} add    stdin=${input}    shell=True    stdout=PIPE    stderr=PIPE
+    Run Process    ${CMD} add    stdin=${input}    shell=True
 
 Remove Requirement
     [Arguments]    ${id}

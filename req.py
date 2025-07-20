@@ -179,7 +179,9 @@ def list_domains():
         console.print(domains_table)
 
 @sync_app.command("to-yaml")
-def sync_to_yaml():
+def sync_to_yaml(
+    file: Optional[Path] = typer.Option(REQ_FILE, help="Path to output YAML file")
+):
     """Dump current SQLite requirements to YAML."""
     init_db()
     with db_conn() as conn:
@@ -195,16 +197,26 @@ def sync_to_yaml():
                 "linked_tests": row["linked_tests"].split(",") if row["linked_tests"] else [],
             })
 
+    if file:
+        REQ_FILE = Path(file)
+        console.print(f"[bold yellow]Using provided YAML file: {REQ_FILE}[/bold yellow]")
+
     with open(REQ_FILE, "w") as f:
         yaml.dump(reqs, f)
 
     console.print(f"[bold green]Exported {len(reqs)} requirements to {REQ_FILE}[/bold green]")
 
 @sync_app.command("from-yaml")
-def sync_from_yaml():
+def sync_from_yaml(
+    file: Optional[Path] = typer.Option(REQ_FILE, help="Path to YAML file with requirements")
+):
     """Import requirements from YAML into SQLite (overwrites DB)."""
+    if file:
+        REQ_FILE = Path(file)
+        console.print(f"[bold yellow]Using provided YAML file: {REQ_FILE}[/bold yellow]")
+
     if not REQ_FILE.exists():
-        console.print("[bold red]Error: requirements.yaml not found.[/bold red]")
+        console.print(f"[bold red]Error: {REQ_FILE} not found.[/bold red]")
         raise typer.Exit()
 
     with open(REQ_FILE, "r") as f:

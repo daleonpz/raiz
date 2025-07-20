@@ -406,7 +406,7 @@ def trace(
         "timestamp": datetime.now().isoformat(),
         "coverage": {
             "total_requirements": total_req,
-            "total_tests": total_tests,
+            "tested_requirements": total_tests,
             "passed_tests": pass_rate,
             "ignored_tests": total_req - total_tests,
             "coverage_percentage": coverage,
@@ -451,7 +451,7 @@ def generate_console_report(report: dict):
     cov = report["coverage"]
     cov_table.add_row(
         str(cov["total_requirements"]),
-        str(cov["total_tests"]),
+        str(cov["tested_requirements"]),
         f"{cov['passed_tests']:.2f}%",
         str(cov["ignored_tests"]),
         f"{cov['coverage_percentage']:.2f}%",

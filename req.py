@@ -42,7 +42,6 @@ REQS_DIR = Path("requirements")
 REQS_DIR.mkdir(exist_ok=True)
 REQ_FILE = REQS_DIR / "requirements.yaml"
 
-
 def db_conn():
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
@@ -444,10 +443,10 @@ def generate_console_report(report: dict):
     # --- Requirements Coverage Summary ---
     cov_table = Table(title="Requirements Coverage Summary", show_header=True, header_style="bold blue")
     cov_table.add_column("Total Requirements", style="dim")
-    cov_table.add_column("Total Tests", style="dim")
+    cov_table.add_column("Tested Requirements", style="dim")
     cov_table.add_column("Passed Tests (%)", style="green")
     cov_table.add_column("Ignored Tests", style="yellow")
-    cov_table.add_column("Req. Coverage (%)", style="bold")
+    cov_table.add_column("Requirements Covered (%)", style="bold")
 
     cov = report["coverage"]
     cov_table.add_row(

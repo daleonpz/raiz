@@ -35,7 +35,9 @@ console = Console()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 # logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
-DB_FILE = "requirements.db"
+REQ_CACHE_DIR = Path(".req_cache")
+REQ_CACHE_DIR.mkdir(exist_ok=True)
+DB_FILE = REQ_CACHE_DIR / "requirements.db"
 REQS_DIR = Path("requirements")
 REQS_DIR.mkdir(exist_ok=True)
 REQ_FILE = REQS_DIR / "requirements.yaml"

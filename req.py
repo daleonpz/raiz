@@ -350,14 +350,15 @@ def trace(
                 req_report[uuid] = {
                     "REQ-ID": req_id,
                     "STATUS": overall if test_name else "NOT TESTED",
-                    "suite": ", ".join(suite_src) if isinstance(suite_src, list) else suite_src,
+                    "suite": suite_src if isinstance(suite_src, list) else [suite_src],
                     "linked_test": test_name,
                 }
+                req_report[uuid]["suite"] = list(set(req_report[uuid]["suite"]))
 
         if detail:
             cur = conn.execute("SELECT DISTINCT domain FROM requirements")
             domains = sorted(row["domain"] for row in cur.fetchall())
-    
+
             cur = conn.execute("SELECT DISTINCT type FROM requirements")
             types = sorted(row["type"] for row in cur.fetchall())
 
@@ -470,7 +471,7 @@ def generate_console_report(report: dict):
         trace_table.add_row(
             row["REQ-ID"],
             row["STATUS"],
-            row["suite"] or "-",
+            ", ".join(row["suite"]) if isinstance(row["suite"], list) else row["suite"] or "-",
             row["linked_test"] or "-"
         )
     console.print(trace_table)

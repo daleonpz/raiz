@@ -63,11 +63,3 @@ Import From YAML Should Restore Requirements
     Length Should Be      ${reqs3}    2
     Should Contain        ${reqs3[0]["description"]}    First test requirement
 
-*** Keywords ***
-Remove Reports Folder
-    Remove File         .requirements_test.yaml
-    Remove File         .req_cache/requirements.db
-    Move File           .req_cache/requirements.db.orig    .req_cache/requirements.db
-
-Save State
-    Move File           .req_cache/requirements.db     .req_cache/requirements.db.orig

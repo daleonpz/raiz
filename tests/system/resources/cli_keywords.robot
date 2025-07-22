@@ -37,3 +37,12 @@ Sync From YAML
 
 Sync To YAML
     Run CLI Command    sync to-yaml --file .requirements_test.yaml
+
+Save State
+    Move File           .req_cache/requirements.db     .req_cache/requirements.db.orig
+
+Remove Reports Folder
+    Remove File         .requirements_test.yaml
+    Remove File         .req_cache/requirements.db
+    Move File           .req_cache/requirements.db.orig    .req_cache/requirements.db
+

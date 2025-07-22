@@ -12,11 +12,11 @@ $(LIB): math.c
 	@mkdir -p build
 	$(CC) $(CFLAGS) -shared -o $(LIB) math.c
 
-test: all
+unit_test: all
 	pytest tests
 
-robot: all
-	robot robot/.
+system_test: all
+	robot tests/system
 
 lint:
 	ruff check .
@@ -33,8 +33,8 @@ clean:
 help:
 	@echo "Makefile commands:"
 	@echo "  all          - Build the shared library"
-	@echo "  test         - Run unit tests with pytest"
-	@echo "  robot        - Run robot framework tests"
+	@echo "  unit_test    - Run unit tests with pytest"
+	@echo "  system_test  - Run system tests with Robot Framework"
 	@echo "  lint         - Check code style with ruff and black"
 	@echo "  format       - Format code with black"
 	@echo "  clean        - Clean build artifacts and Python bytecode"

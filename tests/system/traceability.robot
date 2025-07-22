@@ -20,6 +20,8 @@ Verify JSON Output File Exists
     File Should Exist    ${TRACE_JSON}
 
 Check Coverage Summary
+    [Documentation]    Check the coverage summary in the trace output JSON file.
+    [Tags]      Trace
     ${json}=    Load JSON From File    ${TRACE_JSON}
     Should Have Value In Json    ${json}    coverage
 
@@ -30,6 +32,8 @@ Check Coverage Summary
     Should Be Equal As Integers    ${json}[coverage][ignored_tests]          1
 
 Check Requirements
+    [Documentation]    Check that all requirements are present and valid in the trace output JSON file.
+    [Tags]      Trace
     ${json}   ${req_keys}=    Load Requirement Keys
 
     Log To Console    Total requirements found: ${req_keys}
@@ -47,6 +51,8 @@ Check Requirements
     END
 
 Check Untested Requirement is REQ-005
+    [Documentation]    Check that the untested requirement is REQ-005.
+    [Tags]      Trace
     ${json}   ${req_keys}=    Load Requirement Keys
     ${untested_req_key}=  Set Variable    None
 
@@ -61,6 +67,8 @@ Check Untested Requirement is REQ-005
     Should Be Equal    ${untested_req_key}    REQ-005
 
 Check Non-existent REQ-999 Is Not Included
+    [Documentation]    Check that the non-existent requirement REQ-999 is not included in the trace output JSON file.
+    [Tags]      Trace
     ${json}   ${req_keys}=    Load Requirement Keys
 
     FOR   ${req_key}  IN  @{req_keys}
@@ -69,6 +77,8 @@ Check Non-existent REQ-999 Is Not Included
     END
 
 A Requirement Does Not Have Duplicate Suite Filenames
+    [Documentation]    Check that a requirement does not have duplicate suite filenames in the trace output JSON file.
+    [Tags]      Trace
     ${json}   ${req_keys}=    Load Requirement Keys
 
     ${req} =  Get From Dictionary    ${json}[report][${req_keys}[0]]    suite

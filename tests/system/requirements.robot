@@ -6,12 +6,14 @@ Resource          resources/cli_keywords.robot
 *** Test Cases ***
 
 Add Requirement Should Work
+    [Documentation]   This test case verifies that adding a requirement works correctly.
     [Tags]  Add
     Add Requirement    First test requirement    functional    ble
     ${reqs}=           List Requirements As JSON
     Should Be Equal As Strings    ${reqs[-1]["description"]}    First test requirement
 
 Add Multiple Requirements And Verify Order
+    [Documentation]   This test case verifies that adding multiple requirements works correctly and they are in the right order.
     [Tags]  Add
     Add Requirement    Second one    functional    ble
     Add Requirement    Third one    constraint    logging
@@ -21,6 +23,7 @@ Add Multiple Requirements And Verify Order
     Should Be Equal As Strings    ${reqs[2]["type"]}    constraint
 
 Update Requirement Domain Should Change Only Domain
+    [Documentation]   This test case verifies that updating a requirement's domain changes only the domain.
     [Tags]  Update
     Update Requirement    2    domain   new_domain 
     ${reqs}=              List Requirements As JSON
@@ -28,6 +31,7 @@ Update Requirement Domain Should Change Only Domain
     Should Be Equal As Strings    ${reqs[1]["type"]}   functional
 
 Update Requirement Type Should Change Only Type
+    [Documentation]   This test case verifies that updating a requirement's type changes only the type.
     [Tags]  Update
     Update Requirement    2    type    constraint 
     ${reqs}=              List Requirements As JSON
@@ -35,6 +39,7 @@ Update Requirement Type Should Change Only Type
     Should Be Equal As Strings    ${reqs[1]["type"]}    constraint
 
 Remove Requirement Should Renumber
+    [Documentation]   This test case verifies that removing a requirement renumbers the remaining requirements.
     [Tags]  Remove
     ${reqs}=              List Requirements As JSON
     Length Should Be      ${reqs}    3
@@ -45,6 +50,7 @@ Remove Requirement Should Renumber
     Should Be Equal As Strings    ${reqs[1]["id"]}    REQ-002
 
 Export To YAML Should Match DB State
+    [Documentation]   This test case verifies that exporting requirements to YAML matches the current state in the database.
     [Tags]  Sync
     ${reqs1}=           List Requirements As JSON
     Sync To YAML
@@ -53,6 +59,7 @@ Export To YAML Should Match DB State
     Should Contain      ${file}    ${reqs1[1]["description"]}
 
 Import From YAML Should Restore Requirements
+    [Documentation]   This test case verifies that importing requirements from YAML restores the requirements correctly.
     [Tags]  Sync
     Remove Requirement    1
     ${reqs2}=             List Requirements As JSON

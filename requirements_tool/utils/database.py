@@ -6,6 +6,7 @@ from typing import Optional, List, Dict
 import uuid
 from pathlib import Path
 import typer
+from requirements_tool.utils.report_generator import ReportWriter
 from rich.traceback import install
 install(show_locals=True)
 
@@ -14,6 +15,9 @@ from rich.console import Console
 REQ_CACHE_DIR = Path(".req_cache")
 REQ_CACHE_DIR.mkdir(exist_ok=True)
 DB_PATH = REQ_CACHE_DIR / "requirements.db"
+
+HEADER_STYLE = "bold magenta"
+MAIN_COLUMN_STYLE = "cyan"
 
 console = Console()
 
@@ -132,9 +136,19 @@ class RequirementsDB:
             cur = conn.execute(query, args)
             rows = cur.fetchall()
 
+            req_table = []
             for row in rows:
-                console.print(f"[bold cyan]REQ-{row['seq_no']:03}[/bold cyan]: {row['description']} "
-                              f"[dim][{row['type']}, {row['domain']}][/dim]")
+                req_table.append([
+                    f"REQ-{row['seq_no']:03}",
+                    row["description"],
+                    row["type"],
+                    row["domain"]
+                ])
+            if not req_table:
+                console.print("[bold yellow]No requirements found.[/bold yellow]")
+                return
+
+            ReportWriter.print_table_console(req_table, title=None, with_title= False)
 
     def show_characteristic(self, char: str):
         """Show all requirements with a specific characteristic."""
@@ -143,12 +157,37 @@ class RequirementsDB:
             console.print(f"[bold red]Invalid characteristic: {char}[/bold red]")
             return
 
+        table = [[char.capitalize()]]
         with self.database as conn:
             cur = conn.execute(f"SELECT DISTINCT {char} FROM requirements")
             values = sorted(row[char] for row in cur.fetchall())
-            console.print(f"[bold green]{char.capitalize()}s:[/bold green]")
             for value in values:
-                console.print(f"- {value}")
+                table.append([value])
 
+            ReportWriter.print_table_console(table, title=None, with_title = False)
+
+    def get_requirements(self) -> Dict[str, str]:
+        """Get all requirements as a mapping of REQ-ID to UUID."""
+        with self.database as conn:
+            cur = conn.execute("SELECT uuid, seq_no FROM requirements")
+            req_dict = {f"REQ-{row['seq_no']:03}": row["uuid"] for row in cur.fetchall()}
+
+        return req_dict
+
+    def link_tests(self, tests: list = None, uuid: str = None):
+        """Link tests to a requirement by UUID."""
+        if not tests or not uuid:
+            console.print("[bold red]No tests or UUID provided for linking.[/bold red]")
+            return
+
+        if not isinstance(tests, list):
+            console.print("[bold red]Tests must be provided as a list.[/bold red]")
+            return
+
+        with self.database as conn:
+            conn.execute(
+                "UPDATE requirements SET linked_tests = ? WHERE uuid = ?",
+                (",".join(tests), uuid),
+            )
 
 

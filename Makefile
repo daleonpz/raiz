@@ -12,6 +12,9 @@ $(LIB): math.c
 	@mkdir -p build
 	$(CC) $(CFLAGS) -shared -o $(LIB) math.c
 
+robot: all
+	robot robot
+
 unit_test: all
 	pytest tests
 

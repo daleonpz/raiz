@@ -28,7 +28,7 @@ Update Requirement
     Run CLI Command    update ${id} ${field} ${value}
 
 List Requirements As JSON
-    ${out}=        Run CLI Command    list all --json
+    ${out}=        Run CLI Command    show all --json
     ${parsed}=     Convert String To JSON    ${out}
     RETURN       ${parsed}
 

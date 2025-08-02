@@ -57,7 +57,7 @@ class ReportWriter:
             str(self.report_data["coverage"]["total_requirements"]),
             str(self.report_data["coverage"]["tested_requirements"]),
             str(self.report_data["coverage"]["pass_rate"]),
-            str(self.report_data["coverage"]["coverage"])
+            str(self.report_data["coverage"]["coverage_rate"])
         ])
 
         self.print_table_console(coverage_table, title="Coverage Summary", with_title=True)
@@ -83,24 +83,24 @@ class ReportWriter:
 
         if detail:
             detailed_stats = self.report_data.get("detailed_report", {})
-            domain_tables = [["Domain", "Total_REQs", "num_TESTED_REQ", "pass_rate", "coverage"]]
+            domain_tables = [["Domain", "Total Requirements", "Number of Tested Requirements", "Pass Rate", "Coverage Rate"]]
             for domain, val in detailed_stats["domains"].items():
                 domain_tables.append([
                     domain,
                     str(val["total_requirements"]),
                     str(val["tested_requirements"]),
                     f"{val['pass_rate']}%",
-                    f"{val['coverage']}%"
+                    f"{val['coverage_rate']}%"
                 ])
 
-                type_tables = [["Type", "Total_REQs", "num_TESTED_REQ", "pass_rate", "coverage"]]
+                type_tables= [["Type", "Total Requirements", "Number of Tested Requirements", "Pass Rate", "Coverage Rate"]]
                 for typ, val in detailed_stats["types"].items():
                     type_tables.append([
                         typ,
                         str(val["total_requirements"]),
                         str(val["tested_requirements"]),
                         f"{val['pass_rate']}%",
-                        f"{val['coverage']}%"
+                        f"{val['coverage_rate']}%"
                     ])
 
             self.print_table_console(domain_tables, title="Domain Statistics", with_title=True)

@@ -10,26 +10,27 @@ Suite Teardown      Remove Test Files
 Resource            resources/cli_keywords.robot
 
 *** Variables ***
-${TRACE_JSON}    ${CURDIR}/trace_output.json
+${TRACE_JSON}    ${CURDIR}/trace_output
+${OUTPUT_TRACE}  ${TRACE_JSON}.json
 ${OUTPUT_XML}    ${CURDIR}/output.xml
 ${ROBOT_TESTS}   ${CURDIR}/support_files/robot_tests
 ${REQ_YAML}      ${CURDIR}/support_files/requirements.yaml
 
 *** Test Cases ***
 Verify JSON Output File Exists
-    File Should Exist    ${TRACE_JSON}
+    File Should Exist    ${OUTPUT_TRACE}
 
 Check Coverage Summary
     [Documentation]    Check the coverage summary in the trace output JSON file.
     [Tags]      Trace
-    ${json}=    Load JSON From File    ${TRACE_JSON}
+    ${json}=    Load JSON From File    ${OUTPUT_TRACE}
+    Log To Console    JSON content: ${json}
     Should Have Value In Json    ${json}    coverage
 
     Should Be Equal As Integers    ${json}[coverage][total_requirements]    5
     Should Be Equal As Integers    ${json}[coverage][tested_requirements]    4
-    Should Be Equal As Numbers     ${json}[coverage][coverage_percentage]    80.0
-    Should Be Equal As Numbers     ${json}[coverage][passed_tests]           100.0
-    Should Be Equal As Integers    ${json}[coverage][ignored_tests]          1
+    Should Be Equal As Numbers     ${json}[coverage][coverage_rate]    80.0
+    Should Be Equal As Numbers     ${json}[coverage][pass_rate]           100.0
 
 Check Requirements
     [Documentation]    Check that all requirements are present and valid in the trace output JSON file.
@@ -39,12 +40,9 @@ Check Requirements
     Log To Console    Total requirements found: ${req_keys}
 
     FOR     ${req_key}  IN  @{req_keys}
-        ${req_id}=  Get From Dictionary    ${json}[report][${req_key}]    REQ-ID
-        Log To Console    Requirement ID: ${req_id}
-        Dictionary Should Contain Key    ${json}[report][${req_key}]    REQ-ID
-        Dictionary Should Contain Key    ${json}[report][${req_key}]    STATUS
-        Dictionary Should Contain Key    ${json}[report][${req_key}]    suite
-        Dictionary Should Contain Key    ${json}[report][${req_key}]    linked_test
+        Log To Console    Requirement ID: ${req_key}
+        Dictionary Should Contain Key    ${json}[report][${req_key}]    linked_tests
+        Dictionary Should Contain Key    ${json}[report][${req_key}]    test_results
 
         # Check that the STATUS is one of the expected values
         Status Should be Valid    ${json}[report][${req_key}][STATUS]
@@ -71,8 +69,8 @@ Check Non-existent REQ-999 Is Not Included
     [Tags]      Trace
     ${json}   ${req_keys}=    Load Requirement Keys
 
-    FOR   ${req_key}  IN  @{req_keys}
-        ${req_id}=  Get From Dictionary    ${json}[report][${req_key}]    REQ-ID
+    FOR   i{.iq_key}  IN  @{req_keys}
+        ${req_id}=  Get From Dictionary    ${json}[reporti[${.iq_key}]    REQ-ID
         Should Not Be Equal    ${req_id}    REQ-999
     END
 
@@ -102,7 +100,7 @@ Run Robot And Trace
     Sync Database
     Run Process         robot    --outputdir    ${CURDIR}    ${ROBOT_TESTS}
     File Should Exist   ${OUTPUT_XML}
-    Run CLI Command     trace --robot-output=${OUTPUT_XML} --output=${TRACE_JSON} --format json
+    Run CLI Command     trace --robot-output=${OUTPUT_XML} --output=${TRACE_JSON} --fmt json
 
 Status Should be Valid
     [Arguments]    ${status}
@@ -110,7 +108,7 @@ Status Should be Valid
     Run Keyword If    '${status}' not in ${allowed}    Fail    Invalid status: ${status}. Allowed statuses are: ${allowed}
 
 Load Requirement Keys
-    ${json}=    Load JSON From File    ${TRACE_JSON}
+    ${json}=    Load JSON From File    ${OUTPUT_TRACE}
     Should Have Value In Json    ${json}    report
     ${req_keys}=  Get Dictionary Keys    ${json}[report]  sort_keys=False
     RETURN      ${json}     ${req_keys}
@@ -118,6 +116,6 @@ Load Requirement Keys
 *** Keywords ***
 Remove Test Files
     Remove Reports Folder
-    Remove File    ${TRACE_JSON}
-    Remove File    ${OUTPUT_XML}
+    # Remove File    ${OUTPUT_TRACE}
+    # Remove File    ${OUTPUT_XML}
 

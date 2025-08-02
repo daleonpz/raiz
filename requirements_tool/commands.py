@@ -74,8 +74,18 @@ def sync_to_yaml(
         REQ_FILE = Path(file)
         typer.echo(f"Using provided YAML file: {REQ_FILE}")
 
+    if isinstance(reqs, defaultdict):
+        reqs = dict(reqs)
+
+    # flat list for YAML it's consistent with the original format
+    flat_list = []
+    for req_id, req_data in reqs.items():
+        entry = {"id": req_id}
+        entry.update(req_data)
+        flat_list.append(entry)
+
     with open(REQ_FILE, "w") as f:
-        yaml.dump(reqs, f)
+        yaml.dump(flat_list, f, default_flow_style=False, sort_keys=False)
 
     typer.echo(f"Exported {len(reqs)} requirements to {REQ_FILE}")
 
@@ -105,12 +115,12 @@ def default_stat():
         "total_tests": 0,
         "passed_tests": 0,
         "pass_rate": 0.0,
-        "coverage": 0.0
+        "coverage_rate": 0.0
     }
 
 def finalize(stat):
     if stat["total_requirements"]:
-        stat["coverage"] = round(stat["tested_requirements"] / stat["total_requirements"] * 100, 2)
+        stat["coverage_rate"] = round(stat["tested_requirements"] / stat["total_requirements"] * 100, 2)
         if stat["total_tests"]:
             stat["pass_rate"] = round(stat["passed_tests"] / stat["total_tests"] * 100, 2)
             # Remove raw passed_tests and total_tests if not needed

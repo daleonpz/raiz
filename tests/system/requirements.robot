@@ -25,7 +25,7 @@ Add Multiple Requirements And Verify Order
 Update Requirement Domain Should Change Only Domain
     [Documentation]   This test case verifies that updating a requirement's domain changes only the domain.
     [Tags]  Update
-    Update Requirement    2    domain   new_domain 
+    Update Requirement    2    --field domain   --value new_domain
     ${reqs}=              List Requirements As JSON
     Should Be Equal As Strings    ${reqs[1]["domain"]}   new_domain
     Should Be Equal As Strings    ${reqs[1]["type"]}   functional
@@ -33,7 +33,7 @@ Update Requirement Domain Should Change Only Domain
 Update Requirement Type Should Change Only Type
     [Documentation]   This test case verifies that updating a requirement's type changes only the type.
     [Tags]  Update
-    Update Requirement    2    type    constraint 
+    Update Requirement    2    --field type    --value constraint
     ${reqs}=              List Requirements As JSON
     Should Be Equal As Strings    ${reqs[1]["domain"]}   new_domain
     Should Be Equal As Strings    ${reqs[1]["type"]}    constraint

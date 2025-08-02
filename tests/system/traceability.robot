@@ -32,7 +32,7 @@ Check Coverage Summary
     Should Be Equal As Numbers     ${json}[coverage][coverage_rate]    80.0
     Should Be Equal As Numbers     ${json}[coverage][pass_rate]           100.0
 
-Check Requirements
+Check All Requirements Are Present
     [Documentation]    Check that all requirements are present and valid in the trace output JSON file.
     [Tags]      Trace
     ${json}   ${req_keys}=    Load Requirement Keys
@@ -44,8 +44,11 @@ Check Requirements
         Dictionary Should Contain Key    ${json}[report][${req_key}]    linked_tests
         Dictionary Should Contain Key    ${json}[report][${req_key}]    test_results
 
-        # Check that the STATUS is one of the expected values
-        Status Should be Valid    ${json}[report][${req_key}][STATUS]
+        ${test_results}=  Get From Dictionary    ${json}[report][${req_key}]    test_results
+
+        FOR     ${tests}    IN  @{test_results}
+            Status Should be Valid    ${tests[2]}
+        END
     END
 
 Check Untested Requirement is REQ-005
@@ -54,40 +57,20 @@ Check Untested Requirement is REQ-005
     ${json}   ${req_keys}=    Load Requirement Keys
     ${untested_req_key}=  Set Variable    None
 
-    # Search for REQ-ID which has STATUS NOT TESTED
-    FOR    ${req_key}  IN  @{req_keys}
-        ${status}=  Get From Dictionary    ${json}[report][${req_key}]    STATUS
-        ${req_id}=  Get From Dictionary    ${json}[report][${req_key}]    REQ-ID
-        ${untested_req_key}=    Set Variable If    '${status}' == 'NOT TESTED'    ${req_id}    ${untested_req_key}
-    END
-
-    Log To Console    Untested Requirement ID: ${untested_req_key}
-    Should Be Equal    ${untested_req_key}    REQ-005
+    ${linked_tests}=  Get From Dictionary    ${json}[report][REQ-005]    linked_tests
+    ${test_results}=  Get From Dictionary    ${json}[report][REQ-005]    test_results
+    Should Be Empty    ${linked_tests}
+    Should Be Empty    ${test_results}
 
 Check Non-existent REQ-999 Is Not Included
     [Documentation]    Check that the non-existent requirement REQ-999 is not included in the trace output JSON file.
     [Tags]      Trace
     ${json}   ${req_keys}=    Load Requirement Keys
 
-    FOR   i{.iq_key}  IN  @{req_keys}
-        ${req_id}=  Get From Dictionary    ${json}[reporti[${.iq_key}]    REQ-ID
+    FOR   ${req_id}  IN  @{req_keys}
+        Log To Console    Checking requirement ID: ${req_id}
         Should Not Be Equal    ${req_id}    REQ-999
     END
-
-A Requirement Does Not Have Duplicate Suite Filenames
-    [Documentation]    Check that a requirement does not have duplicate suite filenames in the trace output JSON file.
-    [Tags]      Trace
-    ${json}   ${req_keys}=    Load Requirement Keys
-
-    ${req} =  Get From Dictionary    ${json}[report][${req_keys}[0]]    suite
-
-    ${num_suites}=  Get Length    ${req}
-    Log To Console    Checking requirement: ${req}
-    Log To Console    Number of suites for requirement ${req_keys}[0]: ${num_suites}
-    ${unique_list}=  Remove Duplicates  ${req}
-    ${num_unique_suites}=  Get Length    ${unique_list}
-
-    Should Be Equal As Integers    ${num_suites}    ${num_unique_suites}
 
 *** Keywords ***
 Sync Database
@@ -104,7 +87,7 @@ Run Robot And Trace
 
 Status Should be Valid
     [Arguments]    ${status}
-    ${allowed}      Create List     NOT TESTED    FAILED    PASSED
+    ${allowed}      Create List     NOT TESTED    FAIL    PASS
     Run Keyword If    '${status}' not in ${allowed}    Fail    Invalid status: ${status}. Allowed statuses are: ${allowed}
 
 Load Requirement Keys

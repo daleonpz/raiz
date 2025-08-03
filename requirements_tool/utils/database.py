@@ -130,14 +130,14 @@ class RequirementsDB:
 
             if req_type:
                 filters.append("type = ?")
-                args.append(type)
+                args.append(req_type)
 
             if domain:
                 filters.append("domain = ?")
                 args.append(domain)
 
             if filters:
-                query += " WHERE " + " AND ".join(filters)
+                query += " AND " + " ".join(filters)
 
             cur = conn.execute(query, args)
             rows = cur.fetchall()

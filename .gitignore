@@ -3,6 +3,10 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Application
+.pytest_cache/
+.req_cache/
+
 # Robot
 log.html
 output.xml

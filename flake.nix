@@ -1,5 +1,5 @@
 {
-  description = "Traceable C + Python CLI + Robot + Pytest Project";
+  description = "Flake for requirements  management tool";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
@@ -9,7 +9,6 @@
   let
     system = "x86_64-linux";
     pkgs = import nixpkgs { system = system; };
-#         pkgs = nixpkgs.legacyPackages.${system};
     python = pkgs.python311;
     pythonPackages = pkgs.python311Packages;
   in 
@@ -26,7 +25,6 @@
         pythonPackages.setuptools
         pythonPackages.wheel
         pythonPackages.pytest
-        pythonPackages.robotframework
         pythonPackages.typer
         pythonPackages.black
         pythonPackages.ruff
@@ -36,6 +34,12 @@
      
       shellHook = ''
             echo "Dev environment for C/Python/Robot ready."
+            if [ ! -d .env ]; then
+                python -m venv .env
+            fi 
+            source .env/bin/activate
+            python -m pip install robotframework
+            python -m pip install robotframework-jsonlibrary
       '';
     };
   };

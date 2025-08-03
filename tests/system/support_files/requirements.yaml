@@ -1,0 +1,30 @@
+- id: REQ-001
+  description: BLE module reconnects in under 5s
+  type: functional
+  domain: ble
+  linked_tests: []
+  uuid: e09f4d1b-564f-486e-b156-f991ba649805
+- id: REQ-002
+  description: Device logs errors to persistent storage
+  type: functional
+  domain: logging
+  linked_tests: []
+  uuid: d3c2f8b1-4a5e-4c8b-9f0e-7b6c1a2d3e4f
+- id: REQ-003
+  description: Sensor sampling rate is adjustable
+  type: functional
+  domain: sensors
+  linked_tests: []
+  uuid: 7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d
+- id: REQ-004
+  description: Data is encrypted before transmission
+  type: non-functional
+  domain: network
+  linked_tests: []
+  uuid: 3f2e1d0c-9b8a-7c6b-5d4e-3c2f1a0b9c8d
+- id: REQ-005
+  description: Data upload works under 2G connection
+  type: constraint
+  domain: network
+  linked_tests: []
+  uuid: 8b7a6c5d-4e3f-2a1b-0c9d-8e7f6a5b4c3d

@@ -12,6 +12,12 @@ Add Integers
     ${result}=    Add    3    4
     Should Be Equal As Integers   ${result}    7
 
+Fail Add Integers
+    [Documentation]    This test case intentionally fails to demonstrate error handling.
+    [Tags]    REQ-001   Add
+    ${result}=    Add    3    4
+    Should Be Equal As Integers   ${result}    8
+
 Multiply Boundaries
     [Documentation]    This test case verifies the multiplication of boundary values.
     [Tags]    REQ-003   Multiply
@@ -24,4 +30,9 @@ Random Test
     ${result}=    Multiply    3     3
     Should Be Equal As Integers  ${result}   9
 
+Multiply Boundaries Low
+    [Documentation]    This test case verifies the multiplication of boundary values.
+    [Tags]    REQ-003   REQ-002     Multiply
+    ${result}=    Multiply    ${HIGH}    ${HIGH}
+    Should Be Equal As Integers   ${result}    100
 

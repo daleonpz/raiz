@@ -246,8 +246,10 @@ class RequirementsDB:
 
     def link_tests(self, tests: list = None, uuid: str = None):
         """Link tests to a requirement by UUID."""
-        if not tests or not uuid:
-            console.print("[bold red]No tests or UUID provided for linking.[/bold red]")
+
+        # tests can be deleted or empty, so we only check if uuid is provided
+        if not uuid:
+            console.print("[bold red]No UUID provided for linking.[/bold red]")
             return
 
         if not isinstance(tests, list):

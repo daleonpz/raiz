@@ -231,5 +231,11 @@ def trace(
         }
     }
     writer = ReportWriter(report)
-    # TODO: update_db is not used yet
+
+    if update_db:
+        for req_id, req_data in reqs.items():
+            tests = req_data["linked_tests"]
+            uuid = req_data.get("uuid")
+            db.link_tests(tests=tests, uuid=uuid)
+
     writer.write(fmt, output, domain, req_type, detail)

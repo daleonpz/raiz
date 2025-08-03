@@ -8,10 +8,9 @@ from pathlib import Path
 from collections import defaultdict
 import typer
 from requirements_tool.utils.report_generator import ReportWriter
+from rich.console import Console
 from rich.traceback import install
 install(show_locals=True)
-
-from rich.console import Console
 
 REQ_CACHE_DIR = Path(".req_cache")
 REQ_CACHE_DIR.mkdir(exist_ok=True)
@@ -179,7 +178,7 @@ class RequirementsDB:
             return
 
         table = [[char.capitalize()]]
-        with self.database as conn:
+        with self.database:
             values = self.get_characteristic(char)
             for value in values:
                 table.append([value])

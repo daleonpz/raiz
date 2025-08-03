@@ -150,13 +150,11 @@ def trace(
     result = ExecutionResult(robot_output)
 
     req_map = defaultdict(list)
-    orphan_tests = []
 
     root_source = result.suite.source
-    get_filename = lambda root, src: os.path.basename(src or root)
 
     for suite in result.suite.suites:
-        suite_filename = get_filename(root_source, suite.source)
+        suite_filename = os.path.basename(suite.source or root_source)
         for test in suite.tests:
             for tag in test.tags:
                 if tag.startswith("REQ-"):

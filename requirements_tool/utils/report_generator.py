@@ -1,6 +1,5 @@
 # Copyright (c) 2025 Daniel Paredes (daleonpz)
 # SPDX-License-Identifier: Apache-2.0
-import csv
 import json
 from rich.table import Table
 from rich.console import Console

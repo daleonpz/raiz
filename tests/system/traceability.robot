@@ -99,6 +99,6 @@ Load Requirement Keys
 *** Keywords ***
 Remove Test Files
     Remove Reports Folder
-    # Remove File    ${OUTPUT_TRACE}
-    # Remove File    ${OUTPUT_XML}
+    Remove File    ${OUTPUT_TRACE}
+    Remove File    ${OUTPUT_XML}
 

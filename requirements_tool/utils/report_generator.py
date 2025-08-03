@@ -2,28 +2,33 @@
 # SPDX-License-Identifier: Apache-2.0
 import csv
 import json
-from typing import List, Dict
+# from typing import List, Dict
 from rich.table import Table
 from rich.console import Console
 from pathlib import Path
+
+from typing import List, Optional, Callable, Union
+from rich.style import Style
 
 console = Console()
 
 class ReportWriter:
     def __init__(self, report_data ):
         self.report_data = report_data
-        self.fields = ["REQ-ID", "suite", "linked_test", "STATUS"]
+        self.fields = ["REQ-ID", "Status", "suite", "linked_test"]
         self.console = Console()
 
     @staticmethod
     # [ [ header1, header2, header3 ], [ row1col1, row1col2, row1col3 ], ... ]
-    def print_table_console(data: List, title: str = "Report", with_title: bool = True):
+    def print_table_console(data: List[List[str]], 
+                            title: str = "Report", 
+                            with_title: bool = True, 
+                            cell_styles: Optional[dict] = {},
+                            row_style_cb: Optional[Callable[[List[str], int], Union[str, Style, None]]] = None
+                            ):
         """Prints a table to the console using Rich."""
 
-        if with_title:
-            table = Table(title=title, show_header=True, header_style="bold magenta")
-        else:
-            table = Table(show_header=True, header_style="bold magenta")
+        table = Table(title=title if with_title else None, show_header=True, header_style="bold magenta")
 
         if not data:
             print("No data to display.")
@@ -32,9 +37,25 @@ class ReportWriter:
         headers = data[0]
         for header in headers:
             table.add_column(header, style="cyan")
+        data_rows = data[1:] if len(data) > 1 else []
 
-        for row in data[1:]:
-            table.add_row(*row)
+#         for row in data[1:]:
+#             table.add_row(*row)
+# 
+        # Add rows with styling
+        for row_idx, row in enumerate(data_rows):
+            # Prepare styled row cells
+            styled_row = []
+            for cell in row:
+                style = cell_styles.get(cell, None)
+                styled_cell = f"[{style}]{cell}[/]" if style else cell
+                styled_row.append(styled_cell)
+
+            row_style = None
+            if row_style_cb:
+                row_style = row_style_cb(row, row_idx)
+
+            table.add_row(*styled_row, style=row_style)
 
         console.print(table)
 
@@ -45,6 +66,8 @@ class ReportWriter:
 
     def write_console(self, domain: str = None, req_type: str = None, detail: bool = False):
         """Pretty-prints the report to the console using Rich."""
+
+        console.print(f"[blink][bold green]Traceability Report - {self.report_data['timestamp']}[/blink][/bold green]", justify="center")
 
         coverage_table = []
         coverage_table.append([
@@ -74,12 +97,35 @@ class ReportWriter:
                 suite, test_name, status = test
                 traceability_report.append([
                     req_id,
+                    status if status else "-",
                     suite if suite else "-",
                     test_name if test_name else "-",
-                    status if status else "-"
                 ])
 
-        self.print_table_console(traceability_report, title="Requirement Traceability Report", with_title=True)
+            ## if test_results is empty, we still want to show the requirement
+            if not test_results:
+                traceability_report.append([
+                    req_id,
+                    "NOT TESTED",
+                    "-",
+                    "-",
+                ])
+
+        # Define cell styles
+        cell_styles = {
+            "FAIL": Style(color="red", blink=True, bold=True),
+            "PASS": "green",
+            "NOT TESTED": "yellow",
+        }
+
+        # Define row style callback (e.g., yellow background for rows where Status is "FAIL")
+        def row_style_callback(row: List[str], row_idx: int) -> Optional[str]:
+            return "on yellow" if row[1] == "FAIL" else None
+
+        self.print_table_console(traceability_report, title="Requirement Traceability Report", with_title=True, 
+                                 cell_styles=cell_styles, row_style_cb=row_style_callback)
+
+#         self.print_table_console(traceability_report, title="Requirement Traceability Report", with_title=True)
 
         if detail:
             detailed_stats = self.report_data.get("detailed_report", {})

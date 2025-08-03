@@ -108,7 +108,7 @@ def sync_from_yaml(
     typer.echo(f"Requirements imported from {REQ_FILE}")
 
 
-def default_stat():
+def _default_stat():
     return {
         "total_requirements": 0,
         "tested_requirements": 0,
@@ -118,7 +118,7 @@ def default_stat():
         "coverage_rate": 0.0
     }
 
-def finalize(stat):
+def _finalize(stat):
     if stat["total_requirements"]:
         stat["coverage_rate"] = round(stat["tested_requirements"] / stat["total_requirements"] * 100, 2)
         if stat["total_tests"]:
@@ -169,10 +169,10 @@ def trace(
 
     logging.debug(f"Updated Requirements with Test Results: {json.dumps(reqs, indent=2)}")
 
-    stats = default_stat()
+    stats = _default_stat()
     detailed_stats = {
-            "domains": defaultdict(default_stat),
-            "types": defaultdict(default_stat)
+            "domains": defaultdict(_default_stat),
+            "types": defaultdict(_default_stat)
     }
 
     # Process reqs
@@ -206,10 +206,10 @@ def trace(
         t["total_tests"] += total_tests
         t["passed_tests"] += passed_count
 
-    finalize(stats)
+    _finalize(stats)
     for group in ["domains", "types"]:
         for key, val in detailed_stats[group].items():
-            finalize(val)
+            _finalize(val)
 
     # Output
     logging.debug(f"Final Stats: {json.dumps(stats, indent=2)}")

@@ -1,5 +1,5 @@
 {
-  description = "Traceable C + Python CLI + Robot + Pytest Project";
+  description = "Flake for requirements  management tool";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";

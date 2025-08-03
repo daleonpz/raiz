@@ -36,7 +36,9 @@ def add():
 
     db.add_requirement(description=description, req_type=req_type, domain=domain)
 
-def remove(req_id: int):
+def remove(
+    req_id: int = typer.Argument(..., help="Requirement ID to remove (e.g., 1)")
+):
     """Remove a requirement by ID and renumber the rest."""
     if req_id < 1:
         typer.echo("Requirement ID must be greater than 0.")
@@ -44,12 +46,16 @@ def remove(req_id: int):
 
     db.rm(req_id)
 
-def update(req_id: int, field: str = None, value: str = None):
+def update(
+    req_id: int = typer.Argument(..., help="Requirement ID to update (e.g., 1)"),
+    field: Optional[str] = typer.Option(None, '--field', '-f', help="Field to update (description, type, domain)"),
+    value: Optional[str] = typer.Option(None, '--value', '-v', help="New value for the field")
+):
     """Update a requirement by REQ ID. Interactive or field-based."""
     db.update_requirement(req_id, field, value)
 
 def show_requirements(
-    req_type: Optional[str] = typer.Option(None, help="Filter by requirement type (functional, non-functional, constraint)"), 
+    req_type: Optional[str] = typer.Option(None,'--type', help="Filter by requirement type (functional, non-functional, constraint)"), 
     domain: Optional[str] = typer.Option(None, help="Filter by requirement domain (e.g., logging, ble, data-processing)"),
     json: Optional[bool] = typer.Option(False, help="Output in JSON format")
 ):
@@ -132,7 +138,7 @@ def trace(
     fmt: str = typer.Option("json", help="Output format: console, json"),
     update_db: bool = typer.Option(False, help="Update linked_tests field in database"),
     domain: Optional[str] = typer.Option(None, help="Filter by domain (only in console)"),
-    req_type: Optional[str] = typer.Option(None, help="Filter by requirement type (only in console)"),
+    req_type: Optional[str] = typer.Option(None,'--type', help="Filter by requirement type (only in console)"),
     detail: bool = typer.Option(False, help="Show detailed trace report (only in console)")
 ):
     """

@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 import csv
 import json
-# from typing import List, Dict
 from rich.table import Table
 from rich.console import Console
 from pathlib import Path
@@ -39,9 +38,6 @@ class ReportWriter:
             table.add_column(header, style="cyan")
         data_rows = data[1:] if len(data) > 1 else []
 
-#         for row in data[1:]:
-#             table.add_row(*row)
-# 
         # Add rows with styling
         for row_idx, row in enumerate(data_rows):
             # Prepare styled row cells
@@ -76,11 +72,20 @@ class ReportWriter:
             "Pass Rate",
             "Coverage",])
 
+        if domain or req_type:
+            print(f"Filtering coverage for domain: {domain}, type: {req_type}")
+            if domain:
+                coverage = self.report_data["detailed_report"]["domains"].get(domain, {})
+            elif req_type:
+                coverage = self.report_data["detailed_report"]["types"].get(req_type, {})
+        else :
+            coverage = self.report_data["coverage"]
+
         coverage_table.append([
-            str(self.report_data["coverage"]["total_requirements"]),
-            str(self.report_data["coverage"]["tested_requirements"]),
-            str(self.report_data["coverage"]["pass_rate"]),
-            str(self.report_data["coverage"]["coverage_rate"])
+            str(coverage.get("total_requirements", 0)),
+            str(coverage.get("tested_requirements", 0)),
+            f"{coverage.get('pass_rate', 0)}%",
+            f"{coverage.get('coverage_rate', 0)}%"
         ])
 
         self.print_table_console(coverage_table, title="Coverage Summary", with_title=True)
@@ -88,7 +93,12 @@ class ReportWriter:
         traceability_report = []
         traceability_report.append(self.fields)
 
-        req_report = list(self.report_data["report"].values())
+        if domain or req_type:
+            filtered_report = {}
+            for req_id, data in self.report_data["report"].items():
+                if (domain and data.get("domain") == domain) or (req_type and data.get("type") == req_type):
+                    filtered_report[req_id] = data
+            self.report_data["report"] = filtered_report
 
         for req_id, data in self.report_data["report"].items():
             # sometimes the values are [] and sometimes they are not
@@ -125,9 +135,7 @@ class ReportWriter:
         self.print_table_console(traceability_report, title="Requirement Traceability Report", with_title=True, 
                                  cell_styles=cell_styles, row_style_cb=row_style_callback)
 
-#         self.print_table_console(traceability_report, title="Requirement Traceability Report", with_title=True)
-
-        if detail:
+        if detail and not (domain or req_type):
             detailed_stats = self.report_data.get("detailed_report", {})
             domain_tables = [["Domain", "Total Requirements", "Number of Tested Requirements", "Pass Rate", "Coverage Rate"]]
             for domain, val in detailed_stats["domains"].items():

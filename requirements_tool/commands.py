@@ -182,7 +182,7 @@ def trace(
 
     # Process reqs
     for req in reqs.values():
-        domain = req["domain"]
+        rdomain = req["domain"]
         rtype = req["type"]
         tested = bool(req["linked_tests"])
         total_tests = len(req["test_results"])
@@ -196,7 +196,7 @@ def trace(
         stats["passed_tests"] += passed_count
 
         # Update domain stats
-        d = detailed_stats["domains"][domain]
+        d = detailed_stats["domains"][rdomain]
         d["total_requirements"] += 1
         if tested:
             d["tested_requirements"] += 1

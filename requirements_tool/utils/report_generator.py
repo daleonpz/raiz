@@ -113,14 +113,14 @@ class ReportWriter:
 
         # Define cell styles
         cell_styles = {
-            "FAIL": Style(color="red", blink=True, bold=True),
+            "FAIL": Style(color="white", blink=True, bold=True),
             "PASS": "green",
             "NOT TESTED": "yellow",
         }
 
         # Define row style callback (e.g., yellow background for rows where Status is "FAIL")
         def row_style_callback(row: List[str], row_idx: int) -> Optional[str]:
-            return "on yellow" if row[1] == "FAIL" else None
+            return "on red" if row[1] == "FAIL" else None
 
         self.print_table_console(traceability_report, title="Requirement Traceability Report", with_title=True, 
                                  cell_styles=cell_styles, row_style_cb=row_style_callback)

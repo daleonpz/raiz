@@ -136,7 +136,6 @@ def trace(
     output: str = typer.Option("traceability", help="Output report filename"),
     robot_output: str = typer.Option("output.xml", help="Path to Robot Framework output.xml"),
     fmt: str = typer.Option("json", help="Output format: console, json"),
-    update_db: bool = typer.Option(False, help="Update linked_tests field in database"),
     domain: Optional[str] = typer.Option(None, help="Filter by domain (only in console)"),
     req_type: Optional[str] = typer.Option(None,'--type', help="Filter by requirement type (only in console)"),
     detail: bool = typer.Option(False, help="Show detailed trace report (only in console)")
@@ -232,10 +231,9 @@ def trace(
     }
     writer = ReportWriter(report)
 
-    if update_db:
-        for req_id, req_data in reqs.items():
-            tests = req_data["linked_tests"]
-            uuid = req_data.get("uuid")
-            db.link_tests(tests=tests, uuid=uuid)
+    for req_id, req_data in reqs.items():
+        tests = req_data["linked_tests"]
+        uuid = req_data.get("uuid")
+        db.link_tests(tests=tests, uuid=uuid)
 
     writer.write(fmt, output, domain, req_type, detail)

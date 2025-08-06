@@ -1,0 +1,52 @@
+[project]
+name = "raiz"
+version = "0.1.0"
+description = "Raiz - Simple CLI Requirements Management Tool"
+authors = [
+    { name = "daleonpz", email = "daniel@baremetallics.com" },
+]
+requires-python = ">=3.8"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+
+dependencies = [
+    "typer>=0.12.0",
+    "PyYAML>=6.0",
+    "rich>=13.0.0",
+    "robotframework>=7.0",
+    "robotframework-jsonlibrary>=0.4"
+]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+    "Environment :: Console",
+]
+
+[project.urls]
+Homepage = "https://github.com/daleonpz/raiz"
+Issues = "https://github.com/daleonpz/raiz/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "black>=24.0",
+    "ruff>=0.7"
+]
+
+[project.scripts]
+raiz = "raiz.cli:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+

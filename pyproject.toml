@@ -1,6 +1,6 @@
 [project]
 name = "raiz"
-version = "0.1.0"
+version = "0.1.1"
 description = "Raiz - Simple CLI Requirements Management Tool"
 authors = [
     { name = "daleonpz", email = "daniel@baremetallics.com" },

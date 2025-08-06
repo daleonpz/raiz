@@ -1,58 +1,28 @@
+# 🧰 Raiz - Simple CLI Requirements Management Tool
 
-```mermaid
+A CLI tool to manage, track, and trace software requirements with automated test case linking, traceability reporting, and seamless integration with Robot Framework.
 
-flowchart TD
-    A[Start] --> B{Is it a weekday?}
-    B -- Yes --> C[Go to work]
-    B -- No --> D[Relax at home]
-    C --> E[Finish work]
-    D --> E
-    E --> F[End of day]
-```
+> Built for developers and teams working with embedded systems, Zephyr RTOS, or other projects where traceability and coverage are crucial.
 
-```plantuml
-@startuml
-start
-if (Is it a weekday?) then (yes)
-  :Go to work;
-else (no)
-  :Relax at home;
-endif
-:Finish work;
-stop
-@enduml
-```
+---
 
-```dot
-digraph G {
-    A [label="Start"]
-    B [label="Is it a weekday?"]
-    C [label="Go to work"]
-    D [label="Relax at home"]
-    E [label="Finish work"]
-    F [label="End of day"]
+## 🚀 Features
 
-    A -> B
-    B -> C [label="Yes"]
-    B -> D [label="No"]
-    C -> E
-    D -> E
-    E -> F
-}
-```
+- 📄 **Define and manage software requirements** (Functional, Non-functional, Constraints)
+- 🔗 **Link test cases** (from Robot Framework) to specific requirements using tags (e.g., `REQ-001`)
+- ✅ **Trace test coverage** — which requirements are tested, which are missing
+- 🗃️ **SQLite-backed DB** for performance and reliability
+- 🧪 **Robot Framework integration** using `output.xml`
+- 📦 Installable via `pip`
+- 📊 **Traceability reporting**: Console, CSV, JSON
+- 🧹 Automatic renumbering of requirements
+- 🧰 Modular and extensible codebase
+- 🧪 Unit test ready
 
-```mermaid
-sequenceDiagram
-actor Alice as Alice
-actor Bob as Bob
-actor A1 as New Actor
+---
 
-Note right of Alice: A typical message
-Alice ->> Bob: HimmsdnoteoverA1: aeu
-Alice ->> A1: send
-A1 --) Alice: receive
-A1 --) Bob: new msg
-Bob ->> Bob: new msg
-Bob ->> Alice: Hi Alice
+## 📦 Installation
 
+```bash
+pip install raiz
 ```

@@ -6,18 +6,39 @@ A CLI tool to manage, track, and trace software requirements with automated test
 
 ---
 
+## 📚 Table of Contents
+
+* [🚀 Features](#-features)
+* [📦 Installation](#-installation)
+* [✍️ Requirements Format (YAML)](#️-requirements-format-yaml)
+* [🧪 Robot Framework Integration](#-robot-framework-integration)
+* [🧾 CLI Usage](#-cli-usage)
+
+  * [📌 Add a Requirement](#-add-a-requirement)
+  * [❌ Remove a Requirement](#️-remove-a-requirement)
+  * [🧬 Trace Requirements Coverage](#-trace-requirements-coverage)
+  * [📋 List Requirements](#-list-requirements)
+  * [🛠️ Update Requirement](#️-update-requirement)
+* [📁 Reports and Temp Files](#-reports-and-temp-files)
+* [🧪 Testing](#-testing)
+* [🏗️ Roadmap](#-roadmap)
+* [📄 License](#-license)
+* [🤝 Contributing](#-contributing)
+
+---
+
 ## 🚀 Features
 
-- 📄 **Define and manage software requirements** (Functional, Non-functional, Constraints)
-- 🔗 **Link test cases** (from Robot Framework) to specific requirements using tags (e.g., `REQ-001`)
-- ✅ **Trace test coverage** — which requirements are tested, which are missing
-- 🗃️ **SQLite-backed DB** for performance and reliability
-- 🧪 **Robot Framework integration** using `output.xml`
-- 📦 Installable via `pip`
-- 📊 **Traceability reporting**: Console, CSV, JSON
-- 🧹 Automatic renumbering of requirements
-- 🧰 Modular and extensible codebase
-- 🧪 Unit test ready
+* 📄 **Define and manage software requirements** (Functional, Non-functional, Constraints)
+* 🔗 **Link test cases** (from Robot Framework) to specific requirements using tags (e.g., `REQ-001`)
+* ✅ **Trace test coverage** — which requirements are tested, which are missing
+* 🗃️ **SQLite-backed DB** for performance and reliability
+* 🧪 **Robot Framework integration** using `output.xml`
+* 📦 Installable via `pip`
+* 📊 **Traceability reporting**: Console, CSV, JSON
+* 🧹 Automatic renumbering of requirements
+* 🧰 Modular and extensible codebase
+* 🧪 Unit test ready
 
 ---
 
@@ -171,7 +192,4 @@ Apache License 2.0
 
 ## 🤝 Contributing
 
-Pull requests welcome! Please run the linter and tests before submitting.
-
-```
-
+Pull requests welcome! Please run the linter (ruff) and tests before submitting.

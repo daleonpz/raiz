@@ -10,15 +10,15 @@ A CLI tool to manage, track, and trace software requirements with automated test
 
 * [🚀 Features](#-features)
 * [📦 Installation](#-installation)
-* [✍️ Requirements Format (YAML)](#️-requirements-format-yaml)
+* [✍️ Requirements Format (YAML)](#-requirements-format-yaml)
 * [🧪 Robot Framework Integration](#-robot-framework-integration)
 * [🧾 CLI Usage](#-cli-usage)
 
   * [📌 Add a Requirement](#-add-a-requirement)
-  * [❌ Remove a Requirement](#️-remove-a-requirement)
+  * [❌ Remove a Requirement](#-remove-a-requirement)
   * [🧬 Trace Requirements Coverage](#-trace-requirements-coverage)
   * [📋 List Requirements](#-list-requirements)
-  * [🛠️ Update Requirement](#️-update-requirement)
+  * [🛠️ Update Requirement](#-update-requirement)
 * [📁 Reports and Temp Files](#-reports-and-temp-files)
 * [🧪 Testing](#-testing)
 * [🏗️ Roadmap](#-roadmap)

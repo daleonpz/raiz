@@ -106,7 +106,6 @@ raiz trace --fmt json --output trace_report
 * `--detail`: generates a more detailed trace report
 
 ```json
-$ cat traceability.json
 {
     "timestamp": "2025-08-08T19:16:46.837013",
     "coverage": {

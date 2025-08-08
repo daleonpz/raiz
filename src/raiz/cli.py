@@ -2,11 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import typer
-import requirements_tool.commands as commands
+import raiz.commands as commands
+from importlib.metadata import version
 from rich.traceback import install
 install(show_locals=True)
 
-app = typer.Typer(help="Software Requirement Traceability CLI")
+app = typer.Typer(help="Raiz CLI - Manage your requirements from the command line")
 show_app = typer.Typer()
 sync_app = typer.Typer()
 
@@ -26,6 +27,11 @@ show_app.command("all")(commands.show_requirements)
 sync_app.command("to-yaml")(commands.sync_to_yaml)
 sync_app.command("from-yaml")(commands.sync_from_yaml)
 
-if __name__ == "__main__":
+def main():
+    """
+    Main entry point for the CLI application.
+    """
     app()
 
+if __name__ == "__main__":
+    main()

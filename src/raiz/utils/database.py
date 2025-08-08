@@ -1,13 +1,14 @@
 # Copyright (c) 2025 Daniel Paredes (daleonpz)
 # SPDX-License-Identifier: Apache-2.0
 
+from raiz.utils.report_generator import ReportWriter
+
 import sqlite3
 from typing import Optional, List, Dict
 import uuid
 from pathlib import Path
 from collections import defaultdict
 import typer
-from requirements_tool.utils.report_generator import ReportWriter
 from rich.console import Console
 from rich.traceback import install
 install(show_locals=True)

@@ -16,6 +16,7 @@ A CLI tool to manage, track, and trace software requirements with automated test
   * [Trace Requirements Coverage](#trace-requirements-coverage)
   * [List Requirements](#list-requirements)
   * [Update Requirement](#update-requirement)
+  * [Sync Requirements](#sync-requirements)
 * [📁 Reports and Temp Files](#reports-and-temp-files)
 * [🧪 Testing](#testing)
 * [🏗️ Roadmap](#roadmap)
@@ -201,6 +202,21 @@ Or directly update the `type` for requirement REQ-003
 raiz update 3 --field type -value performance
 ```
 
+### Sync Requirements
+
+Requirements are stored in a temporary SQLite database. To generate a YAML file with all requirements and commit your changes, use: 
+
+```bash
+raiz sync to-yaml
+git add requirements.yaml
+```
+
+If you have a `requirements.yaml` file and want to load it into the SQLite database, use:
+
+```bash
+raiz sync from-yaml
+```
+
 ## Reports and Temp Files
 
 * `.req_cache/` contains temporal files required to manage requirements
@@ -218,6 +234,7 @@ robot tests/system
 * [x] Multiple output formats (Console/JSON)
 * [ ] Support to [Requirements Interchange Format - ReqIF](https://de.wikipedia.org/wiki/Requirements_Interchange_Format)
 * [ ] Support for the Zephyr RTOS testing framework.
+* [ ]
 
 ## 📄 License
 

@@ -234,7 +234,6 @@ robot tests/system
 * [x] Multiple output formats (Console/JSON)
 * [ ] Support to [Requirements Interchange Format - ReqIF](https://de.wikipedia.org/wiki/Requirements_Interchange_Format)
 * [ ] Support for the Zephyr RTOS testing framework.
-* [ ]
 
 ## 📄 License
 

@@ -4,8 +4,6 @@ A CLI tool to manage, track, and trace software requirements with automated test
 
 > Built for developers and teams working with embedded systems, Zephyr RTOS, or other projects where traceability and coverage are crucial.
 
----
-
 ## 📚 Table of Contents
 
 * [🚀 Features](#-features)
@@ -13,19 +11,16 @@ A CLI tool to manage, track, and trace software requirements with automated test
 * [✍️ Requirements Format (YAML)](#-requirements-format-yaml)
 * [🧪 Robot Framework Integration](#-robot-framework-integration)
 * [🧾 CLI Usage](#-cli-usage)
-
-  * [📌 Add a Requirement](#-add-a-requirement)
-  * [❌ Remove a Requirement](#-remove-a-requirement)
-  * [🧬 Trace Requirements Coverage](#-trace-requirements-coverage)
-  * [📋 List Requirements](#-list-requirements)
-  * [🛠️ Update Requirement](#-update-requirement)
+  * [Add a Requirement](#-add-a-requirement)
+  * [Remove a Requirement](#-remove-a-requirement)
+  * [Trace Requirements Coverage](#-trace-requirements-coverage)
+  * [List Requirements](#-list-requirements)
+  * [Update Requirement](#-update-requirement)
 * [📁 Reports and Temp Files](#-reports-and-temp-files)
 * [🧪 Testing](#-testing)
 * [🏗️ Roadmap](#-roadmap)
 * [📄 License](#-license)
 * [🤝 Contributing](#-contributing)
-
----
 
 ## 🚀 Features
 
@@ -35,20 +30,16 @@ A CLI tool to manage, track, and trace software requirements with automated test
 * 🗃️ **SQLite-backed DB** for performance and reliability
 * 🧪 **Robot Framework integration** using `output.xml`
 * 📦 Installable via `pip`
-* 📊 **Traceability reporting**: Console, CSV, JSON
+* 📊 **Traceability reporting**: Console, JSON
 * 🧹 Automatic renumbering of requirements
 * 🧰 Modular and extensible codebase
-* 🧪 Unit test ready
 
----
 
 ## 📦 Installation
 
 ```bash
 pip install raiz
 ```
-
----
 
 ## ✍️ Requirements Format (YAML)
 
@@ -64,8 +55,6 @@ All requirements are stored in a single `requirements.yaml` file and look like:
 
 IDs are renumbered automatically.
 
----
-
 ## 🧪 Robot Framework Integration
 
 Tests should be tagged with requirement IDs:
@@ -79,17 +68,16 @@ Test BLE Connection
 
 After executing tests (which generates `output.xml`), you can trace coverage.
 
----
-
 ## 🧾 CLI Usage
 
-Run with:
+Run **raiz** from your repository
 
 ```bash
+cd my_repo/
 raiz <command> [options]
 ```
 
-### 📌 Add a Requirement
+### Add a Requirement
 
 ```bash
 raiz add
@@ -97,9 +85,7 @@ raiz add
 
 Prompts for description, type, domain.
 
----
-
-### ❌ Remove a Requirement
+### Remove a Requirement
 
 ```bash
 raiz rm <req_number>
@@ -108,9 +94,7 @@ raiz rm 3
 
 Deletes requirement `REQ-003` and renumbers all remaining ones.
 
----
-
-### 🧬 Trace Requirements Coverage
+### Trace Requirements Coverage
 
 ```bash
 raiz trace --fmt json --output trace_report
@@ -120,6 +104,64 @@ raiz trace --fmt json --output trace_report
 * `--robot-output`: location of the Robot Framework output file
 * `--output`: output of the report file. The extension is added automatically
 * `--detail`: generates a more detailed trace report
+
+```json
+$ cat traceability.json
+{
+    "timestamp": "2025-08-08T19:16:46.837013",
+    "coverage": {
+        "total_requirements": 2,
+        "tested_requirements": 2,
+        "pass_rate": 75.0,
+        "coverage_rate": 100.0
+    },
+    "report": {
+        "REQ-001": {
+            "uuid": "c567c0d4-fe18-4d9b-8a1a-2e6b128ed89f",
+            "description": "Library should have add function",
+            "type": "functional",
+            "domain": "math",
+            "linked_tests": [
+                "Add Integers",
+                "Fail Add Integers"
+            ],
+            "test_results": [
+                [
+                    "test_math.robot",
+                    "Add Integers",
+                    "PASS"
+                ],
+                [
+                    "test_math.robot",
+                    "Fail Add Integers",
+                    "FAIL"
+                ]
+            ]
+        },
+        "REQ-XXX": {
+           ...
+        }
+    },
+    "detailed_report": {
+        "domains": {
+            "math": {
+                "total_requirements": 2,
+                "tested_requirements": 2,
+                "pass_rate": 75.0,
+                "coverage_rate": 100.0
+            }
+        },
+        "types": {
+            "functional": {
+                "total_requirements": 2,
+                "tested_requirements": 2,
+                "pass_rate": 75.0,
+                "coverage_rate": 100.0
+            }
+        }
+    }
+}
+```
 
 Options valid only for `--fmt console`
 
@@ -131,9 +173,10 @@ raiz trace --fmt console --domain ble
 raiz trace --fmt console --type functional
 ```
 
----
+<img width="746" height="285" alt="image" src="https://github.com/user-attachments/assets/bf577a2a-1036-456f-a677-01a20cec6ee4" />
 
-### 📋 List Requirements
+
+### Show Requirements
 
 ```bash
 raiz show all       # Show all saved requirements
@@ -141,9 +184,10 @@ raiz show domains   # Show all unique domains found across the saved requirement
 raiz show types     # Show all unique requirement types found across the saved requirements
 ```
 
----
+<img width="745" height="111" alt="image" src="https://github.com/user-attachments/assets/a37afe18-2d23-45bb-8d51-ee0c4582cd22" />
 
-### 🛠️ Update Requirement
+
+### Update Requirement
 
 ```bash
 raiz update <req_number>
@@ -158,22 +202,16 @@ Or directly update the `type` for requirement REQ-003
 raiz update 3 --field type -value performance
 ```
 
----
-
-## 📁 Reports and Temp Files
+## Reports and Temp Files
 
 * `.req_cache/` contains temporal files required to manage requirements
 * `traceability.json` default output
-
----
 
 ## 🧪 Testing
 
 ```bash
 robot tests/system
 ```
-
----
 
 ## 🏗️ Roadmap
 
@@ -182,13 +220,9 @@ robot tests/system
 * [ ] Support to [Requirements Interchange Format - ReqIF](https://de.wikipedia.org/wiki/Requirements_Interchange_Format)
 * [ ] Support for the Zephyr RTOS testing framework.
 
----
-
 ## 📄 License
 
 Apache License 2.0
-
----
 
 ## 🤝 Contributing
 

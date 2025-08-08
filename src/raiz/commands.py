@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # TODO: should i update the yaml always after each command, bzw after each update of the database?
-# TODO: use sync_to_yaml always after each command?
+# TODO: use sync_to_yaml always after each command???
 #       1. rename variables as _XXX to indicate they are private
 from raiz.utils.database import RequirementsDB
 from raiz.utils.report_generator import ReportWriter

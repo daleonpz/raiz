@@ -4,6 +4,8 @@ A CLI tool to manage, track, and trace software requirements with automated test
 
 > Built for developers and teams working with embedded systems, Zephyr RTOS, or other projects where traceability and coverage are crucial.
 
+You can try Raiz using the provided [example](example/).
+
 ## 📚 Table of Contents
 
 * [🚀 Features](#features)

@@ -1,0 +1,33 @@
+- description: requ 002
+  domain: logging
+  id: REQ-001
+  linked_tests:
+  - Add Integers
+  type: constraint
+  uuid: e09f4d1b-564f-486e-b156-f991ba649805
+- description: description for 002
+  domain: ble
+  id: REQ-002
+  linked_tests:
+  - Multiply Integers
+  type: non-functional
+  uuid: 02302c0a-128c-4f2d-bb6a-e87be88445e8
+- description: antoher ausethousaeohu
+  domain: wlan
+  id: REQ-003
+  linked_tests:
+  - Multiply Boundaries
+  type: functional
+  uuid: 483eb6fe-7c1d-40f6-81bb-dd1069d8ebdd
+- description: extra req
+  domain: logging
+  id: REQ-004
+  linked_tests: []
+  type: functional
+  uuid: c0f3ba54-f431-484a-b06c-0652387fda3d
+- description: new ueau
+  domain: ble
+  id: REQ-005
+  linked_tests: []
+  type: constraint
+  uuid: 31d511fe-f889-4c0a-a227-db19714ec516

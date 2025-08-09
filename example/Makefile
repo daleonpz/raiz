@@ -18,6 +18,7 @@ robot: all
 clean:
 	rm -rf build
 	find . -type f -name "*.pyc" -delete
+	rm log.html output.xml report.html
 
 .PHONY: help
 help:

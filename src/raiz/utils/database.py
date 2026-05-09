@@ -6,7 +6,6 @@ from raiz.utils.report_generator import ReportWriter
 import sqlite3
 from typing import Optional, List, Dict, Any
 import uuid
-import re
 from pathlib import Path
 from collections import defaultdict
 import typer
@@ -318,11 +317,9 @@ class RequirementsDB:
             return
 
         prepared_reqs = []
-        for idx, req in enumerate(reqs, start=1):
-            seq_no = self._parse_seq_no(req, idx)
+        for req in reqs:
             prepared_reqs.append(
                 {
-                    "seq_no": seq_no,
                     "uuid": self._normalize_uuid(req.get("uuid", "")),
                     "description": req.get("description", ""),
                     "type": req.get("type", ""),
@@ -332,8 +329,6 @@ class RequirementsDB:
                     ),
                 }
             )
-
-        prepared_reqs.sort(key=lambda item: item["seq_no"])
 
         with self.database as conn:
             conn.execute("DELETE FROM requirements")
@@ -354,14 +349,6 @@ class RequirementsDB:
     def create_from_yaml(self, reqs: List[Dict[str, str]]):
         """Backward-compatible wrapper for YAML import."""
         self.create_from_records(reqs)
-
-    @staticmethod
-    def _parse_seq_no(req: Dict[str, str], fallback: int) -> int:
-        req_id = str(req.get("id", ""))
-        match = re.match(r"^REQ-(\d+)$", req_id)
-        if match:
-            return int(match.group(1))
-        return fallback
 
     @staticmethod
     def _normalize_uuid(raw_uuid: str) -> str:

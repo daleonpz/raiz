@@ -4,7 +4,7 @@
 from raiz.utils.report_generator import ReportWriter
 
 import sqlite3
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 import uuid
 import re
 from pathlib import Path
@@ -373,7 +373,7 @@ class RequirementsDB:
             return str(uuid.uuid4())
 
     @staticmethod
-    def _normalize_linked_tests(raw_value) -> str:
+    def _normalize_linked_tests(raw_value: Any) -> str:
         if isinstance(raw_value, list):
             return ",".join(str(item) for item in raw_value)
         if isinstance(raw_value, str):

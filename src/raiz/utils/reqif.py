@@ -59,16 +59,24 @@ def load_reqif(file_path: Path) -> List[Dict[str, object]]:
                 raw_fields[key] = value
 
         for key, value in raw_fields.items():
-            if key in {"id", "req_id", "requirement_id"} and value.startswith("REQ-"):
-                req["id"] = value
-            elif key in {"description", "desc"}:
-                req["description"] = value
-            elif key in {"type", "req_type", "requirement_type"}:
-                req["type"] = value
-            elif key == "domain":
-                req["domain"] = value
-            elif key in {"linked_tests", "linkedtest", "tests"}:
-                req["linked_tests"] = _split_linked_tests(value)
+            value_text = str(value or "")
+            if (
+                key in {"id", "req_id", "requirement_id"}
+                and value_text.startswith("REQ-")
+                and not req["id"]
+            ):
+                req["id"] = value_text
+            elif key in {"description", "desc"} and not req["description"]:
+                req["description"] = value_text
+            elif key in {"type", "req_type", "requirement_type"} and not req["type"]:
+                req["type"] = value_text
+            elif key == "domain" and not req["domain"]:
+                req["domain"] = value_text
+            elif (
+                key in {"linked_tests", "linkedtest", "tests"}
+                and not req["linked_tests"]
+            ):
+                req["linked_tests"] = _split_linked_tests(value_text)
 
         if not req["uuid"]:
             req["uuid"] = str(uuid.uuid4())

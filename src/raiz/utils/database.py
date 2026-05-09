@@ -310,7 +310,7 @@ class RequirementsDB:
                 (",".join(tests), uuid),
             )
 
-    def create_from_records(self, reqs: List[Dict[str, str]]):
+    def create_from_records(self, reqs: List[Dict[str, Any]]):
         """Create requirements from normalized input records."""
         if not reqs:
             console.print("[bold red]No requirements provided for creation.[/bold red]")
@@ -346,7 +346,7 @@ class RequirementsDB:
                 )
             conn.commit()
 
-    def create_from_yaml(self, reqs: List[Dict[str, str]]):
+    def create_from_yaml(self, reqs: List[Dict[str, Any]]):
         """Backward-compatible wrapper for YAML import."""
         self.create_from_records(reqs)
 

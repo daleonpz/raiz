@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 import uuid
 import xml.etree.ElementTree as ET
 
@@ -23,13 +23,13 @@ def _split_linked_tests(raw_value: Optional[str]) -> List[str]:
     return [item.strip() for item in raw_value.split(",") if item.strip()]
 
 
-def load_reqif(file_path: Path) -> List[Dict[str, object]]:
+def load_reqif(file_path: Path) -> List[Dict[str, Any]]:
     try:
         tree = ET.parse(file_path)
     except ET.ParseError as exc:
         raise ValueError(f"Invalid ReqIF XML file '{file_path}': {exc}") from exc
     root = tree.getroot()
-    requirements: List[Dict[str, object]] = []
+    requirements: List[Dict[str, Any]] = []
 
     for element in root.iter():
         if _local_name(element.tag) != "SPEC-OBJECT":
@@ -89,7 +89,7 @@ def load_reqif(file_path: Path) -> List[Dict[str, object]]:
     return requirements
 
 
-def dump_reqif(requirements: List[Dict[str, object]], file_path: Path) -> None:
+def dump_reqif(requirements: List[Dict[str, Any]], file_path: Path) -> None:
     reqif = ET.Element("REQ-IF")
     core_content = ET.SubElement(reqif, "CORE-CONTENT")
     spec_objects = ET.SubElement(core_content, "SPEC-OBJECTS")

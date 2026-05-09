@@ -97,7 +97,7 @@ def show_domains():
 def _resolve_format(fmt: str) -> str:
     normalized = fmt.lower()
     if normalized not in {"yaml", "reqif"}:
-        typer.echo("Invalid format. Accepted values are: yaml, reqif")
+        typer.echo("Invalid format. Accepted values are: yaml (default), reqif")
         raise typer.Exit(code=1)
     return normalized
 

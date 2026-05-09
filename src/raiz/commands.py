@@ -97,7 +97,9 @@ def show_domains():
 def _resolve_format(fmt: str) -> str:
     normalized = fmt.lower()
     if normalized not in {"yaml", "reqif"}:
-        typer.echo("Invalid format. Accepted values are: yaml (default), reqif")
+        typer.echo(
+            f"Invalid format '{fmt}'. Accepted values are: yaml (default), reqif"
+        )
         raise typer.Exit(code=1)
     return normalized
 
@@ -161,7 +163,11 @@ def import_requirements(
         with open(source_file, "r") as f:
             reqs = yaml.safe_load(f) or []
     else:
-        reqs = load_reqif(source_file)
+        try:
+            reqs = load_reqif(source_file)
+        except ValueError as exc:
+            typer.echo(f"Error: {exc}")
+            raise typer.Exit(code=1)
 
     db.create_from_records(reqs)
     typer.echo(f"Requirements imported from {source_file}")

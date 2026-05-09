@@ -24,7 +24,10 @@ def _split_linked_tests(raw_value: Optional[str]) -> List[str]:
 
 
 def load_reqif(file_path: Path) -> List[Dict[str, object]]:
-    tree = ET.parse(file_path)
+    try:
+        tree = ET.parse(file_path)
+    except ET.ParseError as exc:
+        raise ValueError(f"Invalid ReqIF XML file '{file_path}': {exc}") from exc
     root = tree.getroot()
     requirements: List[Dict[str, object]] = []
 

@@ -109,7 +109,7 @@ def sync_from_yaml(
 
     if not REQ_FILE.exists():
         typer.echo(f"Error: {REQ_FILE} not found.")
-        raise typer.Exit()
+        raise typer.Exit(code=1)
 
     with open(REQ_FILE, "r") as f:
         reqs = yaml.safe_load(f)
@@ -133,9 +133,8 @@ def _finalize(stat):
         stat["coverage_rate"] = round(stat["tested_requirements"] / stat["total_requirements"] * 100, 2)
         if stat["total_tests"]:
             stat["pass_rate"] = round(stat["passed_tests"] / stat["total_tests"] * 100, 2)
-            # Remove raw passed_tests and total_tests if not needed
-            del stat["passed_tests"]
-            del stat["total_tests"]
+    del stat["passed_tests"]
+    del stat["total_tests"]
 def trace(
     output: str = typer.Option("traceability", help="Output report filename"),
     robot_output: str = typer.Option("output.xml", help="Path to Robot Framework output.xml"),

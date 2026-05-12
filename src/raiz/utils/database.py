@@ -54,7 +54,10 @@ class Database:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.conn:
-            self.conn.commit()
+            if exc_type is None:
+                self.conn.commit()
+            else:
+                self.conn.rollback()
             self.conn.close()
             self.conn = None
 
@@ -78,8 +81,11 @@ class RequirementsDB:
     def rm(self, seq_no: int):
         """Remove a requirement by sequence number and renumber the rest."""
         with self.database as conn:
-            conn.execute("DELETE FROM requirements WHERE seq_no = ?", (seq_no,))
+            cur = conn.execute("DELETE FROM requirements WHERE seq_no = ?", (seq_no,))
             conn.commit()
+            if cur.rowcount == 0:
+                console.print(f"[bold red]REQ-{seq_no:03} not found.[/bold red]")
+                raise typer.Exit(code=1)
             self.renumber_all()
 
         console.print(f"[bold red]REQ-{seq_no:03} removed[/bold red]")
@@ -100,8 +106,8 @@ class RequirementsDB:
             cur = conn.execute("SELECT * FROM requirements WHERE seq_no = ?", (seq_no,))
             row = cur.fetchone()
             if not row:
-                console.print("[bold red]Requirement REQ-{seq_no:03} not found.[/bold red]")
-                raise typer.Exit()
+                console.print(f"[bold red]Requirement REQ-{seq_no:03} not found.[/bold red]")
+                raise typer.Exit(code=1)
 
             if field and value:
                 if field not in VALID_FIELDS:
@@ -137,7 +143,7 @@ class RequirementsDB:
                 args.append(domain)
 
             if filters:
-                query += " AND " + " ".join(filters)
+                query += " AND " + " AND ".join(filters)
 
             cur = conn.execute(query, args)
             rows = cur.fetchall()
@@ -267,7 +273,14 @@ class RequirementsDB:
         """Create requirements from a YAML-like structure."""
         if not reqs:
             console.print("[bold red]No requirements provided for creation.[/bold red]")
-            return
+            raise typer.Exit(code=1)
+
+        REQUIRED_FIELDS = {"uuid", "description", "type", "domain"}
+        for idx, req in enumerate(reqs, start=1):
+            missing = REQUIRED_FIELDS - set(req.keys())
+            if missing:
+                console.print(f"[bold red]Requirement #{idx} is missing required fields: {', '.join(sorted(missing))}[/bold red]")
+                raise typer.Exit(code=1)
 
         with self.database as conn:
             conn.execute("DELETE FROM requirements")

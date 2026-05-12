@@ -5,7 +5,7 @@ Library           Collections
 Library           JSONLibrary
 
 *** Variables ***
-${CMD}           raiz
+${CMD}            raiz
 
 *** Keywords ***
 Run CLI Command

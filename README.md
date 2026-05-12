@@ -244,4 +244,42 @@ Apache License 2.0
 
 ## 🤝 Contributing
 
-Pull requests welcome! Please run the linter (ruff) and tests before submitting.
+Pull requests are welcome!
+
+### Local Development Setup
+
+After cloning the repository, install the package in **editable mode** along with dev dependencies. This lets you run `raiz` directly and pick up any code changes without reinstalling:
+
+```bash
+git clone https://github.com/daleonpz/raiz.git
+cd raiz
+pip install -e ".[dev]"
+```
+
+### Running Raiz Without Installing
+
+With an editable install (`-e`), the `raiz` command is immediately available and reflects every source change you make under `src/raiz/`. No reinstall is needed after editing the code.
+
+```bash
+raiz --help
+```
+
+### Modifying the Code
+
+1. Edit any file under `src/raiz/`.
+2. Run `raiz <command>` to exercise the changed code directly — the editable install picks up the changes automatically.
+
+### Linting and Formatting
+
+```bash
+make lint      # ruff check . && black --check .
+make format    # black .  (auto-formats the code)
+```
+
+### Running the Tests
+
+```bash
+make system_test   # runs: robot tests/system
+```
+
+Please ensure lint and tests pass before opening a pull request.

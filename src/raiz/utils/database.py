@@ -37,7 +37,8 @@ class Database:
     def initialize(self):
         """Initialize the database and create the requirements table if it doesn't exist."""
         with self as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS requirements (
                     uuid TEXT PRIMARY KEY,
                     seq_no INTEGER NOT NULL,
@@ -46,7 +47,8 @@ class Database:
                     domain TEXT NOT NULL,
                     linked_tests TEXT DEFAULT ''
                 )
-            """)
+            """
+            )
             conn.commit()
 
     def __enter__(self):

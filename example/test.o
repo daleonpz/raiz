@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<REQ-IF>
+  <CORE-CONTENT>
+    <SPEC-OBJECTS>
+      <SPEC-OBJECT IDENTIFIER="e09f4d1b-564f-486e-b156-f991ba649805" LONG-NAME="REQ-001">
+        <VALUES>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="id" THE-VALUE="REQ-001"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="description" THE-VALUE="requ 002"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="type" THE-VALUE="constraint"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="domain" THE-VALUE="logging"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="linked_tests" THE-VALUE="Add Integers"/>
+        </VALUES>
+      </SPEC-OBJECT>
+      <SPEC-OBJECT IDENTIFIER="02302c0a-128c-4f2d-bb6a-e87be88445e8" LONG-NAME="REQ-002">
+        <VALUES>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="id" THE-VALUE="REQ-002"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="description" THE-VALUE="description for 002"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="type" THE-VALUE="non-functional"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="domain" THE-VALUE="ble"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="linked_tests" THE-VALUE="Multiply Integers"/>
+        </VALUES>
+      </SPEC-OBJECT>
+      <SPEC-OBJECT IDENTIFIER="483eb6fe-7c1d-40f6-81bb-dd1069d8ebdd" LONG-NAME="REQ-003">
+        <VALUES>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="id" THE-VALUE="REQ-003"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="description" THE-VALUE="antoher ausethousaeohu"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="type" THE-VALUE="functional"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="domain" THE-VALUE="wlan"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="linked_tests" THE-VALUE="Multiply Boundaries"/>
+        </VALUES>
+      </SPEC-OBJECT>
+      <SPEC-OBJECT IDENTIFIER="c0f3ba54-f431-484a-b06c-0652387fda3d" LONG-NAME="REQ-004">
+        <VALUES>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="id" THE-VALUE="REQ-004"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="description" THE-VALUE="extra req"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="type" THE-VALUE="functional"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="domain" THE-VALUE="logging"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="linked_tests" THE-VALUE=""/>
+        </VALUES>
+      </SPEC-OBJECT>
+      <SPEC-OBJECT IDENTIFIER="31d511fe-f889-4c0a-a227-db19714ec516" LONG-NAME="REQ-005">
+        <VALUES>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="id" THE-VALUE="REQ-005"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="description" THE-VALUE="new ueau"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="type" THE-VALUE="constraint"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="domain" THE-VALUE="ble"/>
+          <ATTRIBUTE-VALUE-STRING DEFINITION="linked_tests" THE-VALUE=""/>
+        </VALUES>
+      </SPEC-OBJECT>
+    </SPEC-OBJECTS>
+  </CORE-CONTENT>
+</REQ-IF>

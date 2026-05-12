@@ -234,7 +234,7 @@ robot tests/system
 
 * [x] Report in YAML format
 * [x] Multiple output formats (Console/JSON)
-* [ ] Support to [Requirements Interchange Format - ReqIF](https://de.wikipedia.org/wiki/Requirements_Interchange_Format)
+* [x] Support to [Requirements Interchange Format - ReqIF](https://de.wikipedia.org/wiki/Requirements_Interchange_Format)
 * [ ] Support for the Zephyr RTOS testing framework.
 * [ ] Improve documentation and create wiki.
 

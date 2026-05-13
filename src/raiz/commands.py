@@ -18,6 +18,7 @@ from datetime import datetime
 import logging
 import json
 from rich.traceback import install
+
 install(show_locals=True)
 
 db = RequirementsDB()
@@ -32,6 +33,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
+
 def add():
     """Add a new requirement interactively."""
     description = typer.prompt("Description")
@@ -39,6 +41,7 @@ def add():
     domain = typer.prompt("Domain [e.g., logging, ble, data-processing]")
 
     db.add_requirement(description=description, req_type=req_type, domain=domain)
+
 
 def remove(
     req_id: int = typer.Argument(..., help="Requirement ID to remove (e.g., 1)")
@@ -50,32 +53,47 @@ def remove(
 
     db.rm(req_id)
 
+
 def update(
     req_id: int = typer.Argument(..., help="Requirement ID to update (e.g., 1)"),
-    field: Optional[str] = typer.Option(None, '--field', '-f', help="Field to update (description, type, domain)"),
-    value: Optional[str] = typer.Option(None, '--value', '-v', help="New value for the field")
+    field: Optional[str] = typer.Option(
+        None, "--field", "-f", help="Field to update (description, type, domain)"
+    ),
+    value: Optional[str] = typer.Option(
+        None, "--value", "-v", help="New value for the field"
+    ),
 ):
     """Update a requirement by REQ ID. Interactive or field-based."""
     db.update_requirement(req_id, field, value)
 
+
 def show_requirements(
-    req_type: Optional[str] = typer.Option(None,'--type', help="Filter by requirement type (functional, non-functional, constraint)"), 
-    domain: Optional[str] = typer.Option(None, help="Filter by requirement domain (e.g., logging, ble, data-processing)"),
-    json: Optional[bool] = typer.Option(False, help="Output in JSON format")
+    req_type: Optional[str] = typer.Option(
+        None,
+        "--type",
+        help="Filter by requirement type (functional, non-functional, constraint)",
+    ),
+    domain: Optional[str] = typer.Option(
+        None, help="Filter by requirement domain (e.g., logging, ble, data-processing)"
+    ),
+    json: Optional[bool] = typer.Option(False, help="Output in JSON format"),
 ):
     """Show requirements with optional filtering by type/domain."""
     db.show_requirements(req_type, domain, json)
+
 
 def show_types():
     """Show all unique types."""
     db.show_characteristic("type")
 
+
 def show_domains():
     """Show all unique domains."""
     db.show_characteristic("domain")
 
-def sync_to_yaml( 
-        file: Optional[Path] = typer.Option(REQ_FILE, help="Path to output YAML file")
+
+def sync_to_yaml(
+    file: Optional[Path] = typer.Option(REQ_FILE, help="Path to output YAML file")
 ):
     """Dump current SQLite requirements to YAML."""
     reqs = db.get_requirements()
@@ -99,8 +117,11 @@ def sync_to_yaml(
 
     typer.echo(f"Exported {len(reqs)} requirements to {REQ_FILE}")
 
+
 def sync_from_yaml(
-    file: Optional[Path] = typer.Option(REQ_FILE, help="Path to YAML file with requirements")
+    file: Optional[Path] = typer.Option(
+        REQ_FILE, help="Path to YAML file with requirements"
+    )
 ):
     """Import requirements from YAML into SQLite (overwrites DB)."""
     if file:
@@ -125,24 +146,39 @@ def _default_stat():
         "total_tests": 0,
         "passed_tests": 0,
         "pass_rate": 0.0,
-        "coverage_rate": 0.0
+        "coverage_rate": 0.0,
     }
+
 
 def _finalize(stat):
     if stat["total_requirements"]:
-        stat["coverage_rate"] = round(stat["tested_requirements"] / stat["total_requirements"] * 100, 2)
+        stat["coverage_rate"] = round(
+            stat["tested_requirements"] / stat["total_requirements"] * 100, 2
+        )
         if stat["total_tests"]:
-            stat["pass_rate"] = round(stat["passed_tests"] / stat["total_tests"] * 100, 2)
+            stat["pass_rate"] = round(
+                stat["passed_tests"] / stat["total_tests"] * 100, 2
+            )
             # Remove raw passed_tests and total_tests if not needed
             del stat["passed_tests"]
             del stat["total_tests"]
+
+
 def trace(
     output: str = typer.Option("traceability", help="Output report filename"),
-    robot_output: str = typer.Option("output.xml", help="Path to Robot Framework output.xml"),
+    robot_output: str = typer.Option(
+        "output.xml", help="Path to Robot Framework output.xml"
+    ),
     fmt: str = typer.Option("json", help="Output format: console, json"),
-    domain: Optional[str] = typer.Option(None, help="Filter by domain (only in console)"),
-    req_type: Optional[str] = typer.Option(None,'--type', help="Filter by requirement type (only in console)"),
-    detail: bool = typer.Option(False, help="Show detailed trace report (only in console)")
+    domain: Optional[str] = typer.Option(
+        None, help="Filter by domain (only in console)"
+    ),
+    req_type: Optional[str] = typer.Option(
+        None, "--type", help="Filter by requirement type (only in console)"
+    ),
+    detail: bool = typer.Option(
+        False, help="Show detailed trace report (only in console)"
+    ),
 ):
     """
     Generate traceability report linking REQ-IDs to Robot tests.
@@ -162,8 +198,12 @@ def trace(
         for test in suite.tests:
             for tag in test.tags:
                 if tag.startswith("REQ-"):
-                    logging.debug(f"Found REQ tag: {tag} in test {test.name} in suite {suite_filename}")
-                    req_map.setdefault(tag, []).append((suite_filename, test.name, test.status))
+                    logging.debug(
+                        f"Found REQ tag: {tag} in test {test.name} in suite {suite_filename}"
+                    )
+                    req_map.setdefault(tag, []).append(
+                        (suite_filename, test.name, test.status)
+                    )
 
     logging.debug(f"REQ Map: {json.dumps(req_map, indent=2)}")
 
@@ -174,12 +214,14 @@ def trace(
         reqs[req_id]["linked_tests"] = [test[1] for test in req_map.get(req_id, [])]
         reqs[req_id]["test_results"] = req_map.get(req_id, [])
 
-    logging.debug(f"Updated Requirements with Test Results: {json.dumps(reqs, indent=2)}")
+    logging.debug(
+        f"Updated Requirements with Test Results: {json.dumps(reqs, indent=2)}"
+    )
 
     stats = _default_stat()
     detailed_stats = {
-            "domains": defaultdict(_default_stat),
-            "types": defaultdict(_default_stat)
+        "domains": defaultdict(_default_stat),
+        "types": defaultdict(_default_stat),
     }
 
     # Process reqs
@@ -228,8 +270,8 @@ def trace(
         "report": reqs,
         "detailed_report": {
             "domains": dict(detailed_stats["domains"]),
-            "types": dict(detailed_stats["types"])
-        }
+            "types": dict(detailed_stats["types"]),
+        },
     }
     writer = ReportWriter(report)
 

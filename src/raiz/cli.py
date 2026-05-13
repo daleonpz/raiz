@@ -5,6 +5,7 @@ import typer
 import raiz.commands as commands
 from importlib.metadata import version
 from rich.traceback import install
+
 install(show_locals=True)
 
 app = typer.Typer(help="Raiz CLI - Manage your requirements from the command line")
@@ -27,11 +28,13 @@ show_app.command("all")(commands.show_requirements)
 sync_app.command("to-yaml")(commands.sync_to_yaml)
 sync_app.command("from-yaml")(commands.sync_from_yaml)
 
+
 def main():
     """
     Main entry point for the CLI application.
     """
     app()
+
 
 if __name__ == "__main__":
     main()

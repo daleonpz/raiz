@@ -25,6 +25,7 @@ show_app.command("types")(commands.show_types)
 show_app.command("all")(commands.show_requirements)
 
 
+
 def main():
     """
     Main entry point for the CLI application.

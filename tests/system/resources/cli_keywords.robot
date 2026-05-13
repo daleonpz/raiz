@@ -5,7 +5,7 @@ Library           Collections
 Library           JSONLibrary
 
 *** Variables ***
-${CMD}            python3 req.py
+${CMD}            raiz
 
 *** Keywords ***
 Run CLI Command

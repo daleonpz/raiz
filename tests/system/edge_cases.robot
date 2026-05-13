@@ -5,7 +5,7 @@ Resource          resources/cli_keywords.robot
 Library           OperatingSystem
 
 *** Variables ***
-${CMD}            python3 req.py
+${CMD}            raiz
 
 *** Test Cases ***
 

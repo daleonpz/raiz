@@ -5,7 +5,7 @@ Library           Collections
 Library           JSONLibrary
 
 *** Variables ***
-${CMD}            python3 req.py
+${CMD}           raiz
 
 *** Keywords ***
 Run CLI Command
@@ -39,10 +39,18 @@ Sync To YAML
     Run CLI Command    sync to-yaml --file .requirements_test.yaml
 
 Save State
-    Move File           .req_cache/requirements.db     .req_cache/requirements.db.orig
+    ${exists}=    Run Keyword And Return Status
+    ...    File Should Exist    .req_cache/requirements.db
+    IF    ${exists}
+        Move File    .req_cache/requirements.db    .req_cache/requirements.db.orig
+    END
 
 Remove Reports Folder
-    Remove File         .requirements_test.yaml
-    Remove File         .req_cache/requirements.db
-    Move File           .req_cache/requirements.db.orig    .req_cache/requirements.db
+    Remove File    .requirements_test.yaml
+    Remove File    .req_cache/requirements.db
 
+    ${backup_exists}=    Run Keyword And Return Status
+    ...    File Should Exist    .req_cache/requirements.db.orig
+    IF    ${backup_exists}
+        Move File    .req_cache/requirements.db.orig    .req_cache/requirements.db
+    END

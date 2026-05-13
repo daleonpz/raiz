@@ -354,6 +354,7 @@ class RequirementsDB:
 
     @staticmethod
     def _normalize_uuid(raw_uuid: str) -> str:
+        """Normalize a UUID string, generating a new one if invalid or missing."""
         if not raw_uuid:
             return str(uuid.uuid4())
         try:
@@ -363,6 +364,7 @@ class RequirementsDB:
 
     @staticmethod
     def _normalize_linked_tests(raw_value: Any) -> str:
+        """Normalize linked tests input, converting lists to comma-separated strings."""
         if isinstance(raw_value, list):
             return ",".join(str(item) for item in raw_value)
         if isinstance(raw_value, str):

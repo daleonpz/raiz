@@ -1,4 +1,4 @@
-ettings ***
+*** Settings ***
 Documentation    Orphan tests
 
 *** Test Cases ***

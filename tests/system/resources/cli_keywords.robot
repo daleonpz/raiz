@@ -5,7 +5,7 @@ Library           Collections
 Library           JSONLibrary
 
 *** Variables ***
-${CMD}           raiz
+${CMD}            raiz
 
 *** Keywords ***
 Run CLI Command
@@ -44,6 +44,7 @@ Save State
     IF    ${exists}
         Move File    .req_cache/requirements.db    .req_cache/requirements.db.orig
     END
+
 
 Remove Reports Folder
     Remove File    .requirements_test.yaml

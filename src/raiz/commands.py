@@ -190,14 +190,9 @@ def _finalize(stat):
             stat["tested_requirements"] / stat["total_requirements"] * 100, 2
         )
         if stat["total_tests"]:
-            stat["pass_rate"] = round(
-                stat["passed_tests"] / stat["total_tests"] * 100, 2
-            )
-            # Remove raw passed_tests and total_tests if not needed
-            del stat["passed_tests"]
-            del stat["total_tests"]
-
-
+            stat["pass_rate"] = round(stat["passed_tests"] / stat["total_tests"] * 100, 2)
+    del stat["passed_tests"]
+    del stat["total_tests"]
 def trace(
     output: str = typer.Option("traceability", help="Output report filename"),
     robot_output: str = typer.Option(

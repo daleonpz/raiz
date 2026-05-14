@@ -30,6 +30,8 @@
         pythonPackages.ruff
         pythonPackages.pyyaml
         pythonPackages.rich
+        pythonPackages.build
+        pythonPackages.twine
       ];
      
       shellHook = ''

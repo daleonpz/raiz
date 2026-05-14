@@ -76,7 +76,7 @@ Check Non-existent REQ-999 Is Not Included
 Sync Database
     Log To Console    Syncing database with requirements from ${REQ_YAML}
     Log To Console    Current Directory: ${CURDIR}
-    Run CLI Command   sync from-yaml --file ${REQ_YAML}
+    Run CLI Command   import --format yaml --file ${REQ_YAML}
 
 Run Robot And Trace
     Save State

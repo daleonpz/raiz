@@ -4,7 +4,7 @@
 from raiz.utils.report_generator import ReportWriter
 
 import sqlite3
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 import uuid
 from pathlib import Path
 from collections import defaultdict
@@ -316,8 +316,8 @@ class RequirementsDB:
                 (",".join(tests), uuid),
             )
 
-    def create_from_yaml(self, reqs: List[Dict[str, str]]):
-        """Create requirements from a YAML-like structure."""
+    def create_from_records(self, reqs: List[Dict[str, Any]]):
+        """Create requirements from normalized input records."""
         if not reqs:
             console.print("[bold red]No requirements provided for creation.[/bold red]")
             raise typer.Exit(code=1)
@@ -329,9 +329,23 @@ class RequirementsDB:
                 console.print(f"[bold red]Requirement #{idx} is missing required fields: {', '.join(sorted(missing))}[/bold red]")
                 raise typer.Exit(code=1)
 
+        prepared_reqs = []
+        for req in reqs:
+            prepared_reqs.append(
+                {
+                    "uuid": self._normalize_uuid(req.get("uuid", "")),
+                    "description": req.get("description", ""),
+                    "type": req.get("type", ""),
+                    "domain": req.get("domain", ""),
+                    "linked_tests": self._normalize_linked_tests(
+                        req.get("linked_tests", [])
+                    ),
+                }
+            )
+
         with self.database as conn:
             conn.execute("DELETE FROM requirements")
-            for idx, req in enumerate(reqs, start=1):
+            for idx, req in enumerate(prepared_reqs, start=1):
                 conn.execute(
                     "INSERT INTO requirements (uuid, seq_no, description, type, domain, linked_tests) VALUES (?, ?, ?, ?, ?, ?)",
                     (
@@ -340,7 +354,30 @@ class RequirementsDB:
                         req["description"],
                         req["type"],
                         req["domain"],
-                        ",".join(req.get("linked_tests", [])),
+                        req["linked_tests"],
                     ),
                 )
             conn.commit()
+
+    def create_from_yaml(self, reqs: List[Dict[str, Any]]):
+        """Backward-compatible wrapper for YAML import."""
+        self.create_from_records(reqs)
+
+    @staticmethod
+    def _normalize_uuid(raw_uuid: str) -> str:
+        """Normalize a UUID string, generating a new one if invalid or missing."""
+        if not raw_uuid:
+            return str(uuid.uuid4())
+        try:
+            return str(uuid.UUID(str(raw_uuid)))
+        except ValueError:
+            return str(uuid.uuid4())
+
+    @staticmethod
+    def _normalize_linked_tests(raw_value: Any) -> str:
+        """Normalize linked tests input, converting lists to comma-separated strings."""
+        if isinstance(raw_value, list):
+            return ",".join(str(item) for item in raw_value)
+        if isinstance(raw_value, str):
+            return raw_value
+        return ""

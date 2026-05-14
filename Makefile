@@ -1,24 +1,11 @@
 # Makefile
 
-CC = gcc
-CFLAGS = -fPIC -Wall -Werror
-LIB = build/libmath.so
+.PHONY: dev tests lint format clean
 
-.PHONY: all test robot clean
+dev:
+	pip install -e ".[dev]"
 
-all: $(LIB)
-
-$(LIB): math.c
-	@mkdir -p build
-	$(CC) $(CFLAGS) -shared -o $(LIB) math.c
-
-robot: all
-	robot robot
-
-unit_test: all
-	pytest tests
-
-system_test: all
+tests:
 	robot tests/system
 
 lint:
@@ -35,9 +22,8 @@ clean:
 .PHONY: help
 help:
 	@echo "Makefile commands:"
-	@echo "  all          - Build the shared library"
-	@echo "  unit_test    - Run unit tests with pytest"
-	@echo "  system_test  - Run system tests with Robot Framework"
+	@echo "  dev 		  - Install development version of the package with all dependencies"
+	@echo "  tests		  - Run system tests with Robot Framework"
 	@echo "  lint         - Check code style with ruff and black"
 	@echo "  format       - Format code with black"
 	@echo "  clean        - Clean build artifacts and Python bytecode"

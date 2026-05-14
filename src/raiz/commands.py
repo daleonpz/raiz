@@ -17,6 +17,7 @@ from collections import defaultdict
 from datetime import datetime
 import logging
 import json
+from raiz.utils.reqif import load_reqif, dump_reqif
 from rich.traceback import install
 
 install(show_locals=True)
@@ -25,7 +26,8 @@ db = RequirementsDB()
 
 REQS_DIR = Path("requirements")
 REQS_DIR.mkdir(exist_ok=True)
-REQ_FILE = REQS_DIR / "requirements.yaml"
+REQ_YAML_FILE = REQS_DIR / "requirements.yaml"
+REQ_REQIF_FILE = REQS_DIR / "requirements.reqif"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -92,15 +94,32 @@ def show_domains():
     db.show_characteristic("domain")
 
 
-def sync_to_yaml(
-    file: Optional[Path] = typer.Option(REQ_FILE, help="Path to output YAML file")
+def _resolve_format(fmt: str) -> str:
+    normalized = fmt.lower()
+    if normalized not in {"yaml", "reqif"}:
+        typer.echo(
+            f"Invalid format '{fmt}'. Accepted values are: yaml (default), reqif"
+        )
+        raise typer.Exit(code=1)
+    return normalized
+
+
+def export_requirements(
+    format: str = typer.Option(
+        "yaml", "--format", "-f", help="Export format: yaml (default) or reqif"
+    ),
+    file: Optional[Path] = typer.Option(None, help="Path to output requirements file"),
 ):
-    """Dump current SQLite requirements to YAML."""
+    """Export current SQLite requirements to YAML or ReqIF."""
+    export_format = _resolve_format(format)
     reqs = db.get_requirements()
 
-    if file:
-        REQ_FILE = Path(file)
-        typer.echo(f"Using provided YAML file: {REQ_FILE}")
+    target_file = (
+        Path(file)
+        if file
+        else (REQ_YAML_FILE if export_format == "yaml" else REQ_REQIF_FILE)
+    )
+    typer.echo(f"Using {export_format.upper()} file: {target_file}")
 
     if isinstance(reqs, defaultdict):
         reqs = dict(reqs)
@@ -112,31 +131,46 @@ def sync_to_yaml(
         entry.update(req_data)
         flat_list.append(entry)
 
-    with open(REQ_FILE, "w") as f:
-        yaml.dump(flat_list, f, default_flow_style=False, sort_keys=False)
+    if export_format == "yaml":
+        with open(target_file, "w") as f:
+            yaml.dump(flat_list, f, default_flow_style=False, sort_keys=False)
+    else:
+        dump_reqif(flat_list, target_file)
 
-    typer.echo(f"Exported {len(reqs)} requirements to {REQ_FILE}")
+    typer.echo(f"Exported {len(reqs)} requirements to {target_file}")
 
 
-def sync_from_yaml(
-    file: Optional[Path] = typer.Option(
-        REQ_FILE, help="Path to YAML file with requirements"
-    )
+def import_requirements(
+    format: str = typer.Option(
+        "yaml", "--format", "-f", help="Import format: yaml (default) or reqif"
+    ),
+    file: Optional[Path] = typer.Option(None, help="Path to input requirements file"),
 ):
-    """Import requirements from YAML into SQLite (overwrites DB)."""
-    if file:
-        REQ_FILE = Path(file)
-        typer.echo(f"Using provided YAML file: {REQ_FILE}")
+    """Import requirements from YAML or ReqIF into SQLite (overwrites DB)."""
+    import_format = _resolve_format(format)
+    source_file = (
+        Path(file)
+        if file
+        else (REQ_YAML_FILE if import_format == "yaml" else REQ_REQIF_FILE)
+    )
+    typer.echo(f"Using {import_format.upper()} file: {source_file}")
 
-    if not REQ_FILE.exists():
-        typer.echo(f"Error: {REQ_FILE} not found.")
-        raise typer.Exit(code=1)
+    if not source_file.exists():
+        typer.echo(f"Error: {source_file} not found.")
+        raise typer.Exit()
 
-    with open(REQ_FILE, "r") as f:
-        reqs = yaml.safe_load(f)
+    if import_format == "yaml":
+        with open(source_file, "r") as f:
+            reqs = yaml.safe_load(f) or []
+    else:
+        try:
+            reqs = load_reqif(source_file)
+        except ValueError as exc:
+            typer.echo(f"Error: {exc}")
+            raise typer.Exit(code=1)
 
-    db.create_from_yaml(reqs)
-    typer.echo(f"Requirements imported from {REQ_FILE}")
+    db.create_from_records(reqs)
+    typer.echo(f"Requirements imported from {source_file}")
 
 
 def _default_stat():

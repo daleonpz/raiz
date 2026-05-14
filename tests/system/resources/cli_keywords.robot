@@ -33,10 +33,10 @@ List Requirements As JSON
     RETURN       ${parsed}
 
 Sync From YAML
-    Run CLI Command    sync from-yaml --file .requirements_test.yaml
+    Run CLI Command    import --format yaml --file .requirements_test.yaml
 
 Sync To YAML
-    Run CLI Command    sync to-yaml --file .requirements_test.yaml
+    Run CLI Command    export --format yaml --file .requirements_test.yaml
 
 Save State
     ${exists}=    Run Keyword And Return Status

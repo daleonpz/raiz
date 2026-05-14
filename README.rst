@@ -39,6 +39,7 @@ Installation
    pip install raiz
 
 .. _quick-start:
+
 Quick Start
 -----------
 
@@ -62,6 +63,7 @@ Requirements are stored under ``requirements/`` by default, and temporary
 files are written to ``.req_cache/``.
 
 .. _robot-framework-integration:
+
 Robot Framework Integration
 ---------------------------
 

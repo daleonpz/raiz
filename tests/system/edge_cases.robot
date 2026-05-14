@@ -49,7 +49,7 @@ Show Requirements With Combined Type And Domain Filter
 Sync From Nonexistent YAML Should Fail
     [Documentation]    Syncing from a YAML file that does not exist must fail with a non-zero exit code.
     [Tags]    Sync    EdgeCase
-    ${result}=    Run Process    ${CMD} sync from-yaml --file /nonexistent/path/file.yaml    shell=True
+    ${result}=    Run Process    ${CMD}  import --format yaml --file /nonexistent/path/file.yaml    shell=True
     Should Not Be Equal As Integers    ${result.rc}    0
 
 Sync From YAML With Missing Fields Should Fail
@@ -57,7 +57,7 @@ Sync From YAML With Missing Fields Should Fail
     [Tags]    Sync    EdgeCase
     ${content}=    Set Variable    - description: Missing uuid field\n  type: functional\n  domain: ble\n
     Create File    /tmp/invalid_reqs.yaml    ${content}
-    ${result}=    Run Process    ${CMD} sync from-yaml --file /tmp/invalid_reqs.yaml    shell=True
+    ${result}=    Run Process    ${CMD} import --format yaml --file /tmp/invalid_reqs.yaml    shell=True
     Should Not Be Equal As Integers    ${result.rc}    0
     [Teardown]    Remove File    /tmp/invalid_reqs.yaml
 
@@ -66,7 +66,7 @@ Sync From Empty YAML Should Fail
     [Tags]    Sync    EdgeCase
     Create File    /tmp/empty_reqs.yaml    ${EMPTY}
     ${reqs_before}=    List Requirements As JSON
-    ${result}=         Run Process    ${CMD} sync from-yaml --file /tmp/empty_reqs.yaml    shell=True
+    ${result}=         Run Process    ${CMD} import --format yaml --file /tmp/empty_reqs.yaml    shell=True
     Should Not Be Equal As Integers    ${result.rc}    0
     ${reqs_after}=     List Requirements As JSON
     Length Should Be    ${reqs_after}    ${reqs_before.__len__()}

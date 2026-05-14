@@ -1,6 +1,6 @@
 [project]
 name = "raiz"
-version = "0.1.1"
+version = "0.2.0"
 description = "Raiz - Simple CLI Requirements Management Tool"
 authors = [
     { name = "daleonpz", email = "daniel@baremetallics.com" },
@@ -49,4 +49,3 @@ raiz = "raiz.cli:main"
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
-

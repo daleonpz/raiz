@@ -13,8 +13,8 @@ Contents
 
 - Features_
 - Installation_
-- Quick Start_
-- Robot Framework Integration_
+- `Quick Start <#quick-start>`_
+- `Robot Framework Integration <#robot-framework-integration>`_
 - Documentation_
 - License_
 
@@ -38,6 +38,7 @@ Installation
 
    pip install raiz
 
+.. _quick-start:
 Quick Start
 -----------
 
@@ -60,6 +61,7 @@ Download the `example
 Requirements are stored under ``requirements/`` by default, and temporary
 files are written to ``.req_cache/``.
 
+.. _robot-framework-integration:
 Robot Framework Integration
 ---------------------------
 

@@ -5,6 +5,9 @@
 dev:
 	pip install -e ".[dev]"
 
+nix_pkg:
+	nix build .#raiz
+
 tests:
 	robot tests/system
 
@@ -28,6 +31,7 @@ release:
 help:
 	@echo "Makefile commands:"
 	@echo "  dev 		  - Install development version of the package with all dependencies"
+	@echo "  nix_pkg      - Build the package using Nix"
 	@echo "  tests		  - Run system tests with Robot Framework"
 	@echo "  lint         - Check code style with ruff and black"
 	@echo "  format       - Format code with black"

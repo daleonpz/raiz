@@ -13,7 +13,7 @@ $(LIB): math.c
 	$(CC) $(CFLAGS) -shared -o $(LIB) math.c
 
 robot: all
-	robot robot
+	robot robot/ || true
 
 clean:
 	rm -rf build

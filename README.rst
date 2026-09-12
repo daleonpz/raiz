@@ -46,6 +46,9 @@ Quick Start
 Download the `example
 <https://github.com/daleonpz/raiz/tree/main/example>`_.
 
+**NOTE**: If you use ``nix develop .``, you should use ``python -m raiz.cli`` instead of ``raiz`` in the commands below.
+---
+
 .. code-block:: bash
 
    cd example

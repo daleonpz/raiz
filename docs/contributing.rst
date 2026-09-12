@@ -20,6 +20,17 @@ The ``raiz`` command is available immediately after the editable install:
 
    raiz --help
 
+With Nix
+^^^^^^^^^
+
+After cloning the repository, you can use Nix to set up a development environment:
+
+... code-block:: bash
+
+   nix develop
+   python -m raiz.cli --help
+
+
 Linting and Formatting
 ----------------------
 
@@ -38,3 +49,14 @@ System tests use Robot Framework:
    make tests
 
 ``make tests`` runs ``robot tests/system`` under the hood.
+
+
+Building Nix Packages
+---------------------
+
+If you are using Nix, you can build the Raiz package with:
+
+... code-block:: bash
+
+   nix build .#raiz
+   ./result/bin/raiz --help

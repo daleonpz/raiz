@@ -82,6 +82,14 @@ Tests should be tagged with requirement IDs:
 After executing tests (which generates ``output.xml``), you can trace
 coverage.
 
+Pytest Integration
+^^^^^^^^^^^^^^^^^^^
+
+Pytest is a popular testing framework for Python, but it does not provide the same reporting capabilities as Robot Framework out of the box.
+
+To integrate Pytest with Raiz, use `PytestRunner.py <https://github.com/daleonpz/raiz/tree/main/example_pytest/PytestRunner.py>`_.
+See the `example_pytest <https://github.com/daleonpz/raiz/tree/main/example_pytest>`_ directory for a working example and a reference implementation.
+
 Documentation
 -------------
 
